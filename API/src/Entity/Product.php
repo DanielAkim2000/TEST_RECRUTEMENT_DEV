@@ -2,31 +2,40 @@
 
 namespace App\Entity;
 
-use App\Repository\ProductsRepository;
+use App\Repository\ProductRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: ProductsRepository::class)]
-class Products
+#[ORM\Entity(repositoryClass: ProductRepository::class)]
+class Product
 {
+    private const GROUP_PRODUCT_READ = 'product:read';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups([self::GROUP_PRODUCT_READ])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups([self::GROUP_PRODUCT_READ])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups([self::GROUP_PRODUCT_READ])]
     private ?string $description = null;
 
     #[ORM\Column]
+    #[Groups([self::GROUP_PRODUCT_READ])]
     private ?float $price = null;
 
     #[ORM\ManyToOne(inversedBy: 'createdAt')]
+    #[Groups([self::GROUP_PRODUCT_READ])]
     private ?Category $category = null;
 
     #[ORM\Column]
+    #[Groups([self::GROUP_PRODUCT_READ])]
     private ?\DateTimeImmutable $createdAt = null;
 
     public function getId(): ?int

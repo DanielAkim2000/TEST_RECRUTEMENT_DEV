@@ -14,17 +14,17 @@ class Category
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["category:read"])]
+    #[Groups(["category:read", "product:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(["category:read"])]
+    #[Groups(["category:read", "product:read"])]
     private ?string $name = null;
 
     /**
      * @var Collection<int, Products>
      */
-    #[ORM\OneToMany(targetEntity: Products::class, mappedBy: 'category')]
+    #[ORM\OneToMany(targetEntity: Product::class, mappedBy: 'category')]
     private Collection $products;
 
     public function __construct()
@@ -57,7 +57,7 @@ class Category
         return $this->products;
     }
 
-    public function addProduct(Products $product): static
+    public function addProduct(Product $product): static
     {
         if (!$this->products->contains($product)) {
             $this->products->add($product);
@@ -67,7 +67,7 @@ class Category
         return $this;
     }
 
-    public function removeProduct(Products $product): static
+    public function removeProduct(Product $product): static
     {
         if ($this->products->removeElement($product)) {
             // set the owning side to null (unless already changed)

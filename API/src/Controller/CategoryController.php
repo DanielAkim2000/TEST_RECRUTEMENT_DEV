@@ -3,22 +3,18 @@
 namespace App\Controller;
 
 use App\Entity\Category;
-use App\Repository\CategoryRepository;
-use Doctrine\ORM\Mapping\Entity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api')]
 class CategoryController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
     private LoggerInterface $logger;
-    private SerializerInterface $serializer;
 
     private const CATEGORY_ROUTE = '/category/{id}';
 
@@ -26,11 +22,10 @@ class CategoryController extends AbstractController
 
     private const MESSAGE_CATEGORY_ERROR = 'Une erreur est survenue';
 
-    public function __construct(EntityManagerInterface $entityManager, LoggerInterface $logger, SerializerInterface $serializer)
+    public function __construct(EntityManagerInterface $entityManager, LoggerInterface $logger)
     {
         $this->entityManager = $entityManager;
         $this->logger = $logger;
-        $this->serializer = $serializer;
     }
 
     #[Route('/categories', name: 'get_all_categories', methods: ['GET'])]
