@@ -6,6 +6,7 @@ use App\Repository\CategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
 class Category
@@ -13,9 +14,11 @@ class Category
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["category:read"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["category:read"])]
     private ?string $name = null;
 
     /**
@@ -49,26 +52,28 @@ class Category
     /**
      * @return Collection<int, Products>
      */
-    public function getProdutcs(): Collection
+    public function getProducts(): Collection
     {
         return $this->products;
     }
 
-    public function addProdutcs(Products $products): static
+    public function addProduct(Products $product): static
     {
-        if (!$this->products->contains($products)) {
-            $this->products->add($products);
-            $products->setCategory($this);
+        if (!$this->products->contains($product)) {
+            $this->products->add($product);
+            $product->setCategory($this);
         }
 
         return $this;
     }
 
-    public function removeProdutcs(Products $products): static
+    public function removeProduct(Products $product): static
     {
-        if ($this->products->removeElement($products) && $products->getCategory() === $this) {
+        if ($this->products->removeElement($product)) {
             // set the owning side to null (unless already changed)
-            $products->setCategory(null);
+            if ($product->getCategory() === $this) {
+                $product->setCategory(null);
+            }
         }
 
         return $this;
