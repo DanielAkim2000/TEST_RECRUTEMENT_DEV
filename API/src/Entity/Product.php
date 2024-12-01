@@ -6,6 +6,7 @@ use App\Repository\ProductRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
@@ -20,22 +21,35 @@ class Product
 
     #[ORM\Column(length: 255)]
     #[Groups([self::GROUP_PRODUCT_READ])]
+    #[Assert\NotBlank(message: 'Le nom ne doit pas être vide')]
+    #[Assert\Length(min: 3, max: 255, minMessage: 'Le nom doit contenir au moins 3 caractères', maxMessage: 'Le nom doit contenir au maximum 255 caractères')]
+    #[Assert\Type(type: 'string', message: 'Le nom doit être une chaîne de caractères')]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT)]
     #[Groups([self::GROUP_PRODUCT_READ])]
+    #[Assert\NotBlank(message: 'La description ne doit pas être vide')]
+    #[Assert\Length(min: 3, max: 1024, minMessage: 'La description doit contenir au moins 3 caractères', maxMessage: 'La description doit contenir au maximum 1024 caractères')]
+    #[Assert\Type(type: 'string', message: 'La description doit être une chaîne de caractères')]
     private ?string $description = null;
 
     #[ORM\Column]
     #[Groups([self::GROUP_PRODUCT_READ])]
+    #[Assert\NotBlank(message: 'Le prix ne doit pas être vide')]
+    #[Assert\Type(type: 'float', message: 'Le prix doit être un nombre décimal')]
+    #[Assert\Positive(message: 'Le prix doit être un nombre positif')]
     private ?float $price = null;
 
     #[ORM\ManyToOne(inversedBy: 'createdAt')]
+    #[Assert\NotBlank(message: 'Cette catégorie n\'existe pas')]
+    #[Assert\Type(type: Category::class, message: 'La catégorie doit être une instance de Category')]
     #[Groups([self::GROUP_PRODUCT_READ])]
     private ?Category $category = null;
 
     #[ORM\Column]
     #[Groups([self::GROUP_PRODUCT_READ])]
+    #[Assert\NotBlank(message: 'La date de création ne doit pas être vide')]
+    #[Assert\Type(type: "\DateTimeImmutable", message: 'La date de création doit être une instance de DateTimeImmutable')]
     private ?\DateTimeImmutable $createdAt = null;
 
     public function getId(): ?int

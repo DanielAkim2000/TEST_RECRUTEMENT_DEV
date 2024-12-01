@@ -9,12 +9,14 @@ use Symfony\Component\Routing\Attribute\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api')]
 class CategoryController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
     private LoggerInterface $logger;
+    private ValidatorInterface $validator;
 
     private const CATEGORY_ROUTE = '/category/{id}';
 
@@ -22,10 +24,11 @@ class CategoryController extends AbstractController
 
     private const MESSAGE_CATEGORY_ERROR = 'Une erreur est survenue';
 
-    public function __construct(EntityManagerInterface $entityManager, LoggerInterface $logger)
+    public function __construct(EntityManagerInterface $entityManager, LoggerInterface $logger, ValidatorInterface $validator)
     {
         $this->entityManager = $entityManager;
         $this->logger = $logger;
+        $this->validator = $validator;
     }
 
     #[Route('/categories', name: 'get_all_categories', methods: ['GET'])]
@@ -69,6 +72,11 @@ class CategoryController extends AbstractController
             $category = new Category();
             $category->setName($content['name']);
 
+            $errors = $this->validator->validate($category);
+
+            if (count($errors) > 0) {
+                return $this->json($errors, 400);
+            }
             $this->entityManager->persist($category);
             $this->entityManager->flush();
 

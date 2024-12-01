@@ -4,16 +4,19 @@ namespace App\Controller;
 
 use App\Entity\Category;
 use App\Entity\Product;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api')]
 class ProductController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
+    private ValidatorInterface $validator;
 
     private const PRODUCT_ROUTE = '/product/{id}';
     private const MESSAGE_PRODUCT_NOT_FOUND = 'Produit non trouvé';
@@ -22,9 +25,10 @@ class ProductController extends AbstractController
 
 
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $entityManager, ValidatorInterface $validator)
     {
         $this->entityManager = $entityManager;
+        $this->validator = $validator;
     }
 
 
@@ -70,18 +74,25 @@ class ProductController extends AbstractController
             $product = new Product();
             $product->setName($data['name']);
             $product->setDescription($data['description']);
-            $product->setPrice($data['price']);
-            $product->setCreatedAt(new \DateTimeImmutable());
+            if (is_float($data['price'])) {
+                $product->setPrice($data['price']);
+            }
+            // definition de la date de creation
+            $newDate = new DateTimeImmutable();
+            $product->setCreatedAt($newDate);
 
             //on verifie si la categorie existe
             if (isset($data['category_id'])) {
                 $category = $this->entityManager->getRepository(Category::class)->find($data['category_id']);
-                if (!$category) {
-                    return $this->json([
-                        'message' => "La catégorie n'existe pas"
-                    ], 404);
+                if ($category) {
+                    $product->setCategory($category);
                 }
-                $product->setCategory($category);
+            }
+            // on verifie les erreurs
+            $errors = $this->validator->validate($product);
+            // si il y a des erreurs on les retourne
+            if (count($errors) > 0) {
+                return $this->json($errors, 400);
             }
 
             // on persiste et on flush
@@ -99,19 +110,29 @@ class ProductController extends AbstractController
     {
         try {
             $product = $this->entityManager->getRepository(Product::class)->find($id);
-
             if (!$product) {
                 return $this->json([
                     'message' => self::MESSAGE_PRODUCT_NOT_FOUND
                 ], 404);
             }
-
             $content = $request->getContent();
             $data =  json_decode($content, true);
 
             $product->setName($data['name']);
             $product->setDescription($data['description']);
             $product->setPrice($data['price']);
+
+            if (isset($data['category_id'])) {
+                $category = $this->entityManager->getRepository(Category::class)->find($data['category_id']);
+                if ($category) {
+                    $product->setCategory($category);
+                }
+            }
+
+            $errors = $this->validator->validate($product);
+            if (count($errors) > 0) {
+                return $this->json($errors, 400);
+            }
 
             $this->entityManager->persist($product);
             $this->entityManager->flush();
@@ -121,6 +142,7 @@ class ProductController extends AbstractController
             return $this->json(['message' => $e->getMessage()], 500);
         }
     }
+
 
     #[Route(self::PRODUCT_ROUTE, name: 'delete_product', methods: ['DELETE'])]
     public function delete_product(int $id): JsonResponse

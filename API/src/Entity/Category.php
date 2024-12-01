@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
 class Category
@@ -19,10 +20,13 @@ class Category
 
     #[ORM\Column(length: 255)]
     #[Groups(["category:read", "product:read"])]
+    #[Assert\NotBlank(message: 'Le nom ne doit pas être vide')]
+    #[Assert\Length(min: 3, max: 255, minMessage: 'Le nom doit contenir au moins 3 caractères', maxMessage: 'Le nom doit contenir au maximum 255 caractères')]
+    #[Assert\Type(type: 'string', message: 'Le nom doit être une chaîne de caractères')]
     private ?string $name = null;
 
     /**
-     * @var Collection<int, Products>
+     * @var Collection<int, Product>
      */
     #[ORM\OneToMany(targetEntity: Product::class, mappedBy: 'category')]
     private Collection $products;
@@ -50,7 +54,7 @@ class Category
     }
 
     /**
-     * @return Collection<int, Products>
+     * @return Collection<int, Product>
      */
     public function getProducts(): Collection
     {
