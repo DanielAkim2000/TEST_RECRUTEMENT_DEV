@@ -27,9 +27,11 @@ const Home = () => {
             Filter par:
           </Typography>
           <div className="flex gap-4 flex-grow flex-col sm:flex-row justify-end">
-            <InputPriceFilter />
             <SelectCategoryForFilter />
             <SelectLimitForTable />
+          </div>
+          <div className="mt-2">
+            <InputPriceFilter />
           </div>
         </div>
       </div>

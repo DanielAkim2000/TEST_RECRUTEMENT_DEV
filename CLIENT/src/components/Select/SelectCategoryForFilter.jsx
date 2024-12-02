@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   selectCategory,
   setCategory,
+  setPage,
 } from "../../redux/slices/searchData.slice";
 
 const SelectCategoryForFilter = () => {
@@ -21,6 +22,7 @@ const SelectCategoryForFilter = () => {
       (category) => category.id === event.target.value
     );
     dispatch(setCategory(category));
+    dispatch(setPage(1));
   };
 
   return (

@@ -16,8 +16,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { setFormProduct } from "../../redux/slices/formProduct.slice";
 import { useSearchProductsQuery } from "../../api/slices/product.slice";
 import {
+  selectCategory,
   selectLimit,
   selectPage,
+  selectPriceMax,
+  selectPriceMin,
   selectSearch,
 } from "../../redux/slices/searchData.slice";
 
@@ -25,10 +28,19 @@ const TableProducts = () => {
   const page = useSelector(selectPage) || 1;
   const limit = useSelector(selectLimit) || 5;
   const search = useSelector(selectSearch) || "";
+  const priceMax = useSelector(selectPriceMax) || 10000;
+  const priceMin = useSelector(selectPriceMin) || 0;
+  const category = useSelector(selectCategory);
 
   const safeSearch = typeof search === "string" ? search : "";
   const safeLimit = typeof limit === "number" ? limit : 5;
   const safePage = typeof page === "number" ? page : 1;
+  const safePrice = {
+    min: typeof priceMin === "number" ? priceMin : 0,
+    max: typeof priceMax === "number" ? priceMax : 10000,
+  };
+  const safeCategory =
+    typeof category === "object" ? category : { id: 0, name: "" };
 
   const {
     data: filteredData,
@@ -41,6 +53,9 @@ const TableProducts = () => {
     search: safeSearch,
     page: safePage,
     limit: safeLimit,
+    priceMin: safePrice.min,
+    priceMax: safePrice.max,
+    category: safeCategory,
   });
   const dispatch = useDispatch();
 
@@ -52,7 +67,7 @@ const TableProducts = () => {
 
   useEffect(() => {
     refetch();
-  }, [search, page, limit, refetch]);
+  }, [search, page, limit, refetch, priceMin, priceMax, category]);
 
   console.log("isLoading", isLoading);
 

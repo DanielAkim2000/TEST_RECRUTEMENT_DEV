@@ -173,11 +173,12 @@ class ProductController extends AbstractController
             $search = trim($request->query->get('search', ''));
             $page = $request->query->getInt('page') ?? 1;
             $limit = $request->query->getInt('limit') ?? 10;
-            $price = $request->query->get('price') ?? 'ASC';
-            $category_id = $request->query->getInt('category_id') ?? 0;
+            $priceMin = $request->query->get('priceMin') ? (float)$request->query->get('priceMin') : null;
+            $priceMax = $request->query->get('priceMax') ? (float)$request->query->get('priceMax') : null;
+            $category_id = $request->query->getInt('category') ?? 0;
 
-            $products = $this->entityManager->getRepository(Product::class)->findPaginatedProductsBySearch($page, $limit, $search, $price, $category_id);
-            $totalItems = $this->entityManager->getRepository(Product::class)->countProductsBySearch($search);
+            $products = $this->entityManager->getRepository(Product::class)->findPaginatedProductsBySearch($page, $limit, $search, $priceMin, $priceMax, $category_id);
+            $totalItems = $this->entityManager->getRepository(Product::class)->countProductsBySearch($search, $priceMin, $priceMax, $category_id);
             $totalPages = ceil($totalItems / $limit);
             return $this->json([
                 'products' => $products,

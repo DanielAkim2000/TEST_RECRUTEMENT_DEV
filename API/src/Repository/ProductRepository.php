@@ -18,7 +18,7 @@ class ProductRepository extends ServiceEntityRepository
     /**
      * @return Product[] Returns an array of Products objects
      */
-    public function findPaginatedProductsBySearch($page, $limit, $search, $price, $category_id): array
+    public function findPaginatedProductsBySearch($page, $limit, $search, $priceMin, $priceMax, $category_id): array
     {
         if ($page < 1) {
             $page = 1;
@@ -26,10 +26,13 @@ class ProductRepository extends ServiceEntityRepository
         if ($limit < 1) {
             $limit = 1;
         }
-        if ($price < 0) {
-            $price = null;
+        if ($priceMin < 0) {
+            $priceMin = null;
         }
-        if ($category_id < 1) {
+        if ($priceMax < $priceMin || $priceMax < 0) {
+            $priceMax = null;
+        }
+        if ($category_id <= 0) {
             $category_id = null;
         }
 
@@ -42,12 +45,18 @@ class ProductRepository extends ServiceEntityRepository
             ->setMaxResults($limit);
 
         if ($category_id !== null) {
-            $qb->andWhere("p.category_id = :category_id")
+            $qb->andWhere("p.category = :category_id")
                 ->setParameter("category_id", $category_id);
         }
 
-        if ($price !== null) {
-            $qb->orderBy("p.price", $price > 0 ? 'ASC' : 'DESC');
+        if ($priceMin !== null) {
+            $qb->andWhere("p.price >= :priceMin")
+                ->setParameter("priceMin", $priceMin);
+        }
+
+        if ($priceMax !== null) {
+            $qb->andWhere("p.price <= :priceMax")
+                ->setParameter("priceMax", $priceMax);
         }
 
         return $qb->getQuery()
@@ -56,12 +65,15 @@ class ProductRepository extends ServiceEntityRepository
     /**
      * @return int Returns the number of products
      */
-    public function countProductsBySearch($search, $price, $category_id): int
+    public function countProductsBySearch($search, $priceMin, $priceMax, $category_id): int
     {
-        if ($price < 0) {
-            $price = null;
+        if ($priceMin < 0) {
+            $priceMin = null;
         }
-        if ($category_id < 1) {
+        if ($priceMax < $priceMin || $priceMax < 0) {
+            $priceMax = null;
+        }
+        if ($category_id <= 0) {
             $category_id = null;
         }
         $qb = $this->createQueryBuilder("p")
@@ -69,15 +81,19 @@ class ProductRepository extends ServiceEntityRepository
             ->andWhere("LOWER(p.name) LIKE LOWER(:search)")
             ->setParameter("search", "%" . $search . "%");
 
-        // Filtrer par category_id seulement si il est défini
         if ($category_id !== null) {
-            $qb->andWhere("p.category_id = :category_id")
+            $qb->andWhere("p.category = :category_id")
                 ->setParameter("category_id", $category_id);
         }
 
-        // Filtrer par prix seulement si il est défini
-        if ($price !== null) {
-            $qb->orderBy("p.price", $price > 0 ? 'ASC' : 'DESC');
+        if ($priceMin !== null) {
+            $qb->andWhere("p.price >= :priceMin")
+                ->setParameter("priceMin", $priceMin);
+        }
+
+        if ($priceMax !== null) {
+            $qb->andWhere("p.price <= :priceMax")
+                ->setParameter("priceMax", $priceMax);
         }
 
         return $qb->getQuery()
