@@ -38,5 +38,3 @@ export const {
   useUpdateCategoryMutation,
   useDeleteCategoryMutation,
 } = categorySlice;
-
-export default categorySlice;

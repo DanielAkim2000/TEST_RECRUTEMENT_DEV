@@ -9,6 +9,9 @@ const theme = createTheme({
     secondary: {
       main: "#6c757d",
     },
+    orange: {
+      main: "#fd7e14",
+    },
     success: {
       main: "#28a745",
     },
@@ -46,6 +49,23 @@ const theme = createTheme({
       },
     },
     MuiInput: {
+      styleOverrides: {
+        root: {
+          fontFamily: "'Nunito', sans-serif",
+          borderRadius: 10,
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          fontFamily: "'Nunito', sans-serif",
+          borderRadius: 10,
+          fontWeight: "bold",
+        },
+      },
+    },
+    MuiTextField: {
       styleOverrides: {
         root: {
           fontFamily: "'Nunito', sans-serif",

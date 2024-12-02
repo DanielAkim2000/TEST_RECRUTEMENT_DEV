@@ -19,14 +19,15 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import StorefrontIcon from "@mui/icons-material/Storefront";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
+import LoginIcon from "@mui/icons-material/Login";
 import SearchIcon from "@mui/icons-material/Search";
+import PropTypes from "prop-types";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
-  borderRadius: theme.shape.borderRadius,
+  borderRadius: 10,
   backgroundColor: alpha(theme.palette.common.white, 0.15),
   "&:hover": {
     backgroundColor: alpha(theme.palette.common.white, 0.25),
@@ -74,7 +75,7 @@ const drawerWidth = 240;
 const Header = (props) => {
   const { window } = props;
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [auth, setAuth] = React.useState(true);
+  const [auth, setAuth] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const handleDrawerToggle = () => {
@@ -91,7 +92,6 @@ const Header = (props) => {
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
       <div className="items-center flex flex-row justify-center">
-        <StorefrontIcon className="mr-1" />
         <Typography variant="h6" sx={{ my: 2 }}>
           DEV TEACH
         </Typography>
@@ -116,30 +116,17 @@ const Header = (props) => {
       <AppBar position="sticky">
         <Container maxWidth="xl">
           <Toolbar disableGutters>
-            <StorefrontIcon
-              sx={{ display: { xs: "none", md: "flex" }, mr: 1 }}
-            />
             <Typography
               variant="h6"
               noWrap
               component="a"
               href="/"
               className="text-nunito"
-              sx={{
-                mr: 2,
-                display: { xs: "none", md: "flex" },
-                fontWeight: 700,
-                letterSpacing: ".3rem",
-                color: "inherit",
-                textDecoration: "none",
-              }}
+              sx={styles.textLogo}
             >
               DEV TEACH
             </Typography>
-            <Box
-              sx={{ display: { xs: "flex", md: "none", flexGrow: 1 } }}
-              alignItems={"center"}
-            >
+            <Box sx={styles.boxMenu} alignItems={"center"}>
               <IconButton
                 size="large"
                 aria-controls="menu-appbar"
@@ -149,30 +136,17 @@ const Header = (props) => {
               >
                 <MenuIcon />
               </IconButton>
-              <StorefrontIcon
-                className="mr-1"
-                sx={{
-                  display: { xs: "none", sm: "flex", md: "none" },
-                }}
-              />
               <Typography
                 variant="h6"
                 noWrap
                 component="a"
                 href="/"
-                sx={{
-                  display: { xs: "none", sm: "flex", md: "none" },
-                  mr: 2,
-                  fontWeight: 700,
-                  letterSpacing: ".3rem",
-                  color: "inherit",
-                  textDecoration: "none",
-                }}
+                sx={styles.textLogoMenu}
               >
                 DEV TEACH
               </Typography>
             </Box>
-            <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
+            <Box sx={styles.listPages}>
               {pages.map((page) => (
                 <Button
                   key={page}
@@ -192,38 +166,46 @@ const Header = (props) => {
                 className="ml-auto"
               />
             </Search>
-            {auth && (
-              <div>
-                <IconButton
-                  size="large"
-                  aria-label="account of current user"
-                  aria-controls="menu-appbar"
-                  aria-haspopup="true"
-                  onClick={handleMenu}
-                  color="inherit"
-                >
-                  <AccountCircle />
-                </IconButton>
-                <Menu
-                  id="menu-appbar"
-                  anchorEl={anchorEl}
-                  anchorOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                  open={Boolean(anchorEl)}
-                  onClose={handleClose}
-                >
-                  <MenuItem onClick={handleClose}>Mon Compte</MenuItem>
-                  <MenuItem onClick={handleClose}>Déconnexion</MenuItem>
-                </Menu>
-              </div>
-            )}
+            <div className="ml-2">
+              {auth ? (
+                <div>
+                  <IconButton
+                    size="large"
+                    aria-label="account of current user"
+                    aria-controls="menu-appbar"
+                    aria-haspopup="true"
+                    onClick={handleMenu}
+                    color="inherit"
+                  >
+                    <AccountCircle />
+                  </IconButton>
+                  <Menu
+                    id="menu-appbar"
+                    anchorEl={anchorEl}
+                    anchorOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                    keepMounted
+                    transformOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                    open={Boolean(anchorEl)}
+                    onClose={handleClose}
+                  >
+                    <MenuItem onClick={handleClose}>Mon Compte</MenuItem>
+                    <MenuItem onClick={handleClose}>Déconnexion</MenuItem>
+                  </Menu>
+                </div>
+              ) : (
+                <div>
+                  <IconButton size="large" color="inherit">
+                    <LoginIcon />
+                  </IconButton>
+                </div>
+              )}
+            </div>
           </Toolbar>
         </Container>
       </AppBar>
@@ -236,19 +218,45 @@ const Header = (props) => {
           ModalProps={{
             keepMounted: true, // Better open performance on mobile.
           }}
-          sx={{
-            display: { sm: "block", md: "none" },
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: drawerWidth,
-            },
-          }}
+          sx={styles.drawer}
         >
           {drawer}
         </Drawer>
       </nav>
     </>
   );
+};
+
+const styles = {
+  textLogo: {
+    mr: 2,
+    display: { xs: "none", md: "flex" },
+    fontWeight: 700,
+    letterSpacing: ".3rem",
+    color: "inherit",
+    textDecoration: "none",
+  },
+  boxMenu: { display: { xs: "flex", md: "none", flexGrow: 1 } },
+  textLogoMenu: {
+    display: { xs: "none", sm: "flex", md: "none" },
+    mr: 2,
+    fontWeight: 700,
+    letterSpacing: ".3rem",
+    color: "inherit",
+    textDecoration: "none",
+  },
+  listPages: { flexGrow: 1, display: { xs: "none", md: "flex" } },
+  drawer: {
+    display: { sm: "block", md: "none" },
+    "& .MuiDrawer-paper": {
+      boxSizing: "border-box",
+      width: drawerWidth,
+    },
+  },
+};
+
+Header.propTypes = {
+  window: PropTypes.func,
 };
 
 export default Header;

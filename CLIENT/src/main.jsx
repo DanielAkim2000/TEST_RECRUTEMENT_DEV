@@ -11,14 +11,17 @@ import "@fontsource/nunito/500.css";
 import "@fontsource/nunito/700.css";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import theme from "./theme.jsx";
+import SnackbarContextProvider from "./context/Provider/snackbar.provider.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <ThemeProvider theme={theme}>
-      <Provider store={store}>
+    <Provider store={store}>
+      <ThemeProvider theme={theme}>
         <CssBaseline />
-        <App />
-      </Provider>
-    </ThemeProvider>
+        <SnackbarContextProvider>
+          <App />
+        </SnackbarContextProvider>
+      </ThemeProvider>
+    </Provider>
   </StrictMode>
 );
