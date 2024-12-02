@@ -37,14 +37,26 @@ const ButtonAdCategory = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 400,
+            width: {
+              xs: "90%",
+              sm: "50%",
+              lg: "30%",
+            },
             bgcolor: "background.paper",
             boxShadow: 24,
             borderRadius: 5,
             p: 4,
           }}
         >
-          <Typography variant="h5">Ajouter un produit</Typography>
+          <Typography
+            variant="h5"
+            align="center"
+            fontWeight="bold"
+            marginBottom={3}
+            sx={{ color: "primary.main" }}
+          >
+            Ajouter une catégorie
+          </Typography>
           <FormCategory handleClose={handleClose} />
         </Box>
       </Modal>

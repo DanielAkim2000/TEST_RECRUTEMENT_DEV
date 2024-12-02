@@ -39,14 +39,26 @@ const ButtonModify = (props) => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 400,
+            width: {
+              xs: "90%",
+              sm: "50%",
+              lg: "30%",
+            },
             bgcolor: "background.paper",
             boxShadow: 24,
             borderRadius: 5,
             p: 4,
           }}
         >
-          <Typography variant="h5">Modifier le produit</Typography>
+          <Typography
+            variant="h5"
+            align="center"
+            fontWeight="bold"
+            marginBottom={3}
+            sx={{ color: "primary.main" }}
+          >
+            Modifier le produit
+          </Typography>
           <FormProduct handleClose={handleClose} />
         </Box>
       </Modal>

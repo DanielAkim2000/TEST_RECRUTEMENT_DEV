@@ -6,6 +6,8 @@ import ButtonAdCategory from "../components/Button/ButtonAdCategory";
 import BtnSeeAllCategories from "../components/Button/BtnSeeAllCategories";
 import SelectLimitForTable from "../components/Select/SelectLimitForTable";
 import PaginatorTableProduct from "../components/Paginator/PaginatorTableProduct";
+import InputPriceFilter from "../components/Input/InputPriceFilter";
+import SelectCategoryForFilter from "../components/Select/SelectCategoryForFilter";
 
 const Home = () => {
   return (
@@ -20,7 +22,16 @@ const Home = () => {
           </Typography>
           <Typography variant="h5">Liste des produits</Typography>
         </div>
-        <SelectLimitForTable />
+        <div className="mt-3 sm:mt-0 flex-grow">
+          <Typography variant="h6" marginBottom={1}>
+            Filter par:
+          </Typography>
+          <div className="flex gap-4 flex-grow flex-col sm:flex-row justify-end">
+            <InputPriceFilter />
+            <SelectCategoryForFilter />
+            <SelectLimitForTable />
+          </div>
+        </div>
       </div>
       {/* <Typography variant="h5">Liste des catégories</Typography>
       <ListCategories /> */}

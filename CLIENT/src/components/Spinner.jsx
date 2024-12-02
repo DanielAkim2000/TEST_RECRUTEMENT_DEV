@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 
 const RotatingIcon = styled(CachedIcon)(({ theme }) => ({
-  animation: "rotate 1s linear infinite",
+  animation: "rotate 1s ease infinite",
   "@keyframes rotate": {
     "0%": { transform: "rotate(0deg)" },
     "100%": { transform: "rotate(360deg)" },
