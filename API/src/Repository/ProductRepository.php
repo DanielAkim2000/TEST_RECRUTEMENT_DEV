@@ -18,32 +18,69 @@ class ProductRepository extends ServiceEntityRepository
     /**
      * @return Product[] Returns an array of Products objects
      */
-    public function findPaginatedProductsBySearch($page, $limit, $search): array
+    public function findPaginatedProductsBySearch($page, $limit, $search, $price, $category_id): array
     {
         if ($page < 1) {
             $page = 1;
         }
+        if ($limit < 1) {
+            $limit = 1;
+        }
+        if ($price < 0) {
+            $price = null;
+        }
+        if ($category_id < 1) {
+            $category_id = null;
+        }
 
         $offset = ($page - 1) * $limit;
-        return $this->createQueryBuilder('p')
-            ->andWhere('LOWER(p.name) LIKE LOWER(:search)')
-            ->setParameter('search', '%' . $search . '%')
+
+        $qb = $this->createQueryBuilder("p")
+            ->andWhere("LOWER(p.name) LIKE LOWER(:search)")
+            ->setParameter("search", "%" . $search . "%")
             ->setFirstResult($offset)
-            ->setMaxResults($limit)
-            ->getQuery()
+            ->setMaxResults($limit);
+
+        if ($category_id !== null) {
+            $qb->andWhere("p.category_id = :category_id")
+                ->setParameter("category_id", $category_id);
+        }
+
+        if ($price !== null) {
+            $qb->orderBy("p.price", $price > 0 ? 'ASC' : 'DESC');
+        }
+
+        return $qb->getQuery()
             ->getResult();
     }
-
     /**
      * @return int Returns the number of products
      */
-    public function countProductsBySearch($search): int
+    public function countProductsBySearch($search, $price, $category_id): int
     {
-        return $this->createQueryBuilder('p')
-            ->select('COUNT(p.id)')
-            ->andWhere('LOWER(p.name) LIKE LOWER(:search)')
-            ->setParameter('search', '%' . $search . '%')
-            ->getQuery()
+        if ($price < 0) {
+            $price = null;
+        }
+        if ($category_id < 1) {
+            $category_id = null;
+        }
+        $qb = $this->createQueryBuilder("p")
+            ->select("COUNT(p.id)")
+            ->andWhere("LOWER(p.name) LIKE LOWER(:search)")
+            ->setParameter("search", "%" . $search . "%");
+
+        // Filtrer par category_id seulement si il est défini
+        if ($category_id !== null) {
+            $qb->andWhere("p.category_id = :category_id")
+                ->setParameter("category_id", $category_id);
+        }
+
+        // Filtrer par prix seulement si il est défini
+        if ($price !== null) {
+            $qb->orderBy("p.price", $price > 0 ? 'ASC' : 'DESC');
+        }
+
+        return $qb->getQuery()
             ->getSingleScalarResult();
     }
 

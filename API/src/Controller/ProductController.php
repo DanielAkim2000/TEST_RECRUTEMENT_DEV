@@ -173,8 +173,10 @@ class ProductController extends AbstractController
             $search = trim($request->query->get('search', ''));
             $page = $request->query->getInt('page') ?? 1;
             $limit = $request->query->getInt('limit') ?? 10;
+            $price = $request->query->get('price') ?? 'ASC';
+            $category_id = $request->query->getInt('category_id') ?? 0;
 
-            $products = $this->entityManager->getRepository(Product::class)->findPaginatedProductsBySearch($page, $limit, $search);
+            $products = $this->entityManager->getRepository(Product::class)->findPaginatedProductsBySearch($page, $limit, $search, $price, $category_id);
             $totalItems = $this->entityManager->getRepository(Product::class)->countProductsBySearch($search);
             $totalPages = ceil($totalItems / $limit);
             return $this->json([
