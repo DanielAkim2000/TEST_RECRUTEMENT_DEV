@@ -48,6 +48,11 @@ const FormCategory = (props) => {
       }}
       onSubmit={async (e) => {
         e.preventDefault();
+        if (isSubmitDisabled()) {
+          openSnackbar(
+            "Veuillez vérifier que le nom de la catégorie contient entre 3 et 255 caractères."
+          );
+        }
         await createCategory(category);
       }}
     >

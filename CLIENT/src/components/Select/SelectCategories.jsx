@@ -9,6 +9,7 @@ import {
 
 const SelectCategories = () => {
   const { data: categories } = useGetCategoriesQuery();
+  const [touched, setTouched] = React.useState(false);
 
   const category = useSelector(selectCategory);
   const dispatch = useDispatch();
@@ -36,7 +37,7 @@ const SelectCategories = () => {
   };
 
   const checkCategory = () => {
-    if (!testCategory(category)) {
+    if (!testCategory(category) && touched) {
       return true;
     }
     return false;
@@ -55,6 +56,7 @@ const SelectCategories = () => {
         error={checkCategory()}
         helperText={checkCategory() ? "Veuillez choisir une catégorie" : ""}
         onChange={handleChange}
+        onFocus={() => setTouched(true)}
       >
         <MenuItem value={0}>Choisissez une catégorie</MenuItem>
         {categories?.map((category) => (

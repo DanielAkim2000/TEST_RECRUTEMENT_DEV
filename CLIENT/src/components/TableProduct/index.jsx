@@ -17,8 +17,14 @@ import { useDispatch } from "react-redux";
 import { setFormProduct } from "../../redux/slices/formProduct.slice";
 
 const TableProducts = () => {
-  const { data: products, error, isLoading } = useGetProductsQuery();
+  const { data: products, error, isLoading, isSuccess } = useGetProductsQuery();
   const dispatch = useDispatch();
+
+  // useEffect(() => {
+  //   if (isSuccess) {
+  //     dispatch(setProducts(products));
+  //   }
+  // }, [isSuccess, products, dispatch]);
 
   if (isLoading) {
     return (
@@ -37,7 +43,6 @@ const TableProducts = () => {
       </TableContainer>
     );
   }
-
   return (
     <TableContainer
       component={Paper}

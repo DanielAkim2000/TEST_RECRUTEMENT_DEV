@@ -69,6 +69,12 @@ const FormProduct = (props) => {
       }}
       onSubmit={async (e) => {
         e.preventDefault();
+        if (isSubmitDisabled()) {
+          return openSnackbar(
+            "Veuillez vérifier les champs du formulaire",
+            "error"
+          );
+        }
         if (id) {
           await updateProduct(product);
         } else {

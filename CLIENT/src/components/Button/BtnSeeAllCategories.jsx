@@ -14,6 +14,7 @@ import {
   Modal,
   Slide,
   Stack,
+  TextField,
 } from "@mui/material";
 import {
   useDeleteCategoryMutation,
@@ -64,6 +65,10 @@ const RenderRow = (props) => {
     const res = await updateCategory(formCategory);
     if (res?.data?.status === "Categorie mise à jour") {
       openSnackbar("Catégorie modifiée avec succès");
+    } else {
+      openSnackbar(
+        "Erreur lors de la modification de la catégorie , vérifiez que vous avez bien saisie le nom de la catégorie"
+      );
     }
     setEdit(false);
     dispatch(resetFormCategory());
@@ -81,6 +86,9 @@ const RenderRow = (props) => {
     const res = await deleteCategory(data[index]?.id);
     if (res?.data?.status === "Categorie supprimée") {
       openSnackbar("Catégorie supprimée avec succès");
+      handleClose();
+    } else {
+      openSnackbar("Erreur lors de la suppression de la catégorie");
       handleClose();
     }
   };
@@ -104,7 +112,18 @@ const RenderRow = (props) => {
             </IconButton>
           )}
           {edit && (
-            <IconButton onClick={handleSubmit}>
+            <IconButton
+              onClick={
+                formCategory?.name?.length <= 3 ||
+                formCategory?.name?.length >= 255
+                  ? null
+                  : handleSubmit
+              }
+              disabled={
+                formCategory?.name?.length <= 3 ||
+                formCategory?.name?.length >= 255
+              }
+            >
               <Spinner isLoading={isUpdating} content={<SaveAsIcon />} />
             </IconButton>
           )}
@@ -136,14 +155,38 @@ const RenderRow = (props) => {
         </ListItem>
       }
     >
-      <Stack direction="row" spacing={2} alignItems={"center"} padding={0}>
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems={"center"}
+        padding={0}
+        justifyItems={"center"}
+      >
         <span className="font-bold">{data[index]?.id}</span>
         {!edit && <ListItemText primary={`${data[index]?.name}`} />}
         {edit && (
-          <input
+          <TextField
             className="border-b w-auto p-1 rounded-2xl"
             autoFocus
-            value={formCategory.name}
+            size="small"
+            label="Nom"
+            sx={{
+              width: {
+                xs: "100px",
+                sm: "200px",
+              },
+            }}
+            error={
+              formCategory?.name?.length <= 3 ||
+              formCategory?.name?.length >= 255
+            }
+            helperText={
+              formCategory?.name?.length <= 3 ||
+              formCategory?.name?.length >= 255
+                ? "Le nom doit contenir entre 3 et 255 caractères"
+                : ""
+            }
+            value={formCategory?.name}
             onChange={(e) => {
               dispatch(setName(e.target.value));
             }}
@@ -180,7 +223,10 @@ const BtnSeeAllCategories = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 400,
+            width: {
+              xs: "90%",
+              sm: "50%",
+            },
             bgcolor: "background.paper",
             boxShadow: 24,
             borderRadius: 5,
@@ -197,7 +243,7 @@ const BtnSeeAllCategories = () => {
           >
             {RenderRow}
           </FixedSizeList> */}
-          <div className="max-w-[360px] max-h-[400px] overflow-hidden overflow-y-auto">
+          <div className="max-h-[400px] overflow-hidden overflow-y-auto min-w-full">
             {categories?.map((category, index) => (
               <RenderRow key={index} index={index} data={categories} />
             ))}
