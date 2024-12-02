@@ -165,4 +165,26 @@ class ProductController extends AbstractController
             return $this->json(['message' => $e->getMessage()], 500);
         }
     }
+
+    #[Route('/products/search', name: 'get_products_by_category', methods: ['GET'])]
+    public function get_products_by_category(Request $request): JsonResponse
+    {
+        try {
+            $search = trim($request->query->get('search', ''));
+            $page = $request->query->getInt('page') ?? 1;
+            $limit = $request->query->getInt('limit') ?? 10;
+
+            $products = $this->entityManager->getRepository(Product::class)->findPaginatedProductsBySearch($page, $limit, $search);
+            $totalItems = $this->entityManager->getRepository(Product::class)->countProductsBySearch($search);
+            $totalPages = ceil($totalItems / $limit);
+            return $this->json([
+                'products' => $products,
+                "currentPage" => $page,
+                "totalItems" => $totalItems,
+                "totalPages" => $totalPages,
+            ], 200, [], ['groups' => self::GROUP_PRODUCT_READ]);
+        } catch (\Exception $e) {
+            return $this->json(['message' => $e->getMessage()], 500);
+        }
+    }
 }
