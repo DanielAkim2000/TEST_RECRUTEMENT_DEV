@@ -7,6 +7,7 @@ export default {
         "primary-main": "#007bff",
         "orange-main": "#fd7e14",
         "red-main": "#dc3545",
+        "slate-main": "#475569",
         primary: {
           main: "#007bff",
         },

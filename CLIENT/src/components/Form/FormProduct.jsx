@@ -15,6 +15,7 @@ import {
 } from "../../api/slices/product.slice";
 import PropTypes from "prop-types";
 import useSnackBar from "../../hooks/useSnackBar";
+import Spinner from "../Spinner";
 
 const FormProduct = (props) => {
   const product = useSelector(selectFormProduct);
@@ -81,7 +82,11 @@ const FormProduct = (props) => {
       />
       <SelectCategories />
       <Button variant="contained" color="primary" type="submit">
-        {id ? "Modifier" : "Ajouter"}
+        {id ? (
+          <Spinner isLoading={isLoading} content="Modifier" />
+        ) : (
+          <Spinner isLoading={isLoadingAdd} content="Ajouter" />
+        )}
       </Button>
     </Box>
   );

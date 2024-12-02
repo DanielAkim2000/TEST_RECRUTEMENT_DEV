@@ -48,7 +48,7 @@ const theme = createTheme({
         },
       },
     },
-    MuiInput: {
+    MuiInputBase: {
       styleOverrides: {
         root: {
           fontFamily: "'Nunito', sans-serif",
@@ -60,7 +60,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           fontFamily: "'Nunito', sans-serif",
-          borderRadius: 10,
+          borderRadius: 50,
           fontWeight: "bold",
         },
       },

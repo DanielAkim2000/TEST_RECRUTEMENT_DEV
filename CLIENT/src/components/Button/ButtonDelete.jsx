@@ -46,7 +46,7 @@ const ButtonDelete = ({ product }) => {
   }, [isSuccess, isError, openSnackbar]);
   return (
     <>
-      <BtnEffectHover color="red-main" onClick={handleClickOpen}>
+      <BtnEffectHover onClick={handleClickOpen} color="red-main">
         Supprimer
       </BtnEffectHover>
       <Dialog

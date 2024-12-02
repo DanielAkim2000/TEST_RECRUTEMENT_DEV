@@ -1,11 +1,11 @@
 import React from "react";
 import { Box, Modal, Typography } from "@mui/material";
-import FormProduct from "../Form/FormProduct";
 import { useDispatch } from "react-redux";
-import { resetFormProduct } from "../../redux/slices/formProduct.slice";
 import BtnEffectInverseHover from "./BtnEffectInverseHover";
+import FormCategory from "../Form/FormCategory";
+import { resetFormCategory } from "../../redux/slices/formCategory.slice";
 
-const ButtonAdProduct = () => {
+const ButtonAdCategory = () => {
   const dispatch = useDispatch();
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => {
@@ -13,13 +13,13 @@ const ButtonAdProduct = () => {
   };
   const handleClose = () => {
     setOpen(false);
-    dispatch(resetFormProduct());
+    dispatch(resetFormCategory());
   };
 
   return (
     <>
-      <BtnEffectInverseHover onClick={handleOpen} color="primary-main">
-        Ajouter un produit
+      <BtnEffectInverseHover onClick={handleOpen} color="slate-main">
+        Ajouter une catégorie
       </BtnEffectInverseHover>
       <Modal
         open={open}
@@ -41,11 +41,11 @@ const ButtonAdProduct = () => {
           }}
         >
           <Typography variant="h5">Ajouter un produit</Typography>
-          <FormProduct handleClose={handleClose} />
+          <FormCategory handleClose={handleClose} />
         </Box>
       </Modal>
     </>
   );
 };
 
-export default ButtonAdProduct;
+export default ButtonAdCategory;

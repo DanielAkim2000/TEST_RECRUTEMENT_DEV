@@ -2,6 +2,8 @@ import React from "react";
 import { Typography } from "@mui/material";
 import TableProducts from "../components/TableProduct";
 import ButtonAdProduct from "../components/Button/ButtonAdProduct";
+import ButtonAdCategory from "../components/Button/ButtonAdCategory";
+import BtnSeeAllCategories from "../components/Button/BtnSeeAllCategories";
 
 const Home = () => {
   return (
@@ -15,8 +17,12 @@ const Home = () => {
       {/* <Typography variant="h5">Liste des catégories</Typography>
       <ListCategories /> */}
       <Typography variant="h5">Liste des produits</Typography>
-      <div className="my-5">
+      <div className="my-5 flex flex-row gap-5">
         <ButtonAdProduct />
+        <ButtonAdCategory />
+        <div className="ml-auto">
+          <BtnSeeAllCategories />
+        </div>
       </div>
       <TableProducts />
     </div>

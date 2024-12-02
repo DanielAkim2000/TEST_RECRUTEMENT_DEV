@@ -1,6 +1,6 @@
 //snackbar context
 import { Snackbar } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SnackbarContext } from "../snackbar.context";
 
 const SnackbarContextProvider = ({ children }) => {
@@ -15,6 +15,14 @@ const SnackbarContextProvider = ({ children }) => {
   const closeSnackbar = () => {
     setOpen(false);
   };
+
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => {
+        closeSnackbar();
+      }, 4000);
+    }
+  }, [open]);
 
   return (
     <SnackbarContext.Provider value={{ openSnackbar, closeSnackbar }}>

@@ -1,9 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
 import PropTypes from "prop-types";
 import { useCallback } from "react";
 import { Button } from "@mui/material";
 
-const BtnEffectHover = ({ children, color = "primary-main", ...rest }) => {
+const BtnEffectInverseHover = ({
+  children,
+  color = "primary-main",
+  ...rest
+}) => {
   const [isHover, setIsHover] = React.useState(false);
 
   const handelMouseEnter = useCallback(() => {
@@ -20,12 +24,10 @@ const BtnEffectHover = ({ children, color = "primary-main", ...rest }) => {
         return "#007bff";
       case "orange-main":
         return "#fd7e14";
-      case "red-main":
-        return "#dc3545";
       case "slate-main":
         return "#475569";
-      case "green-main":
-        return "bg-green-main";
+      case "red-main":
+        return "#dc3545";
       case "blue-main":
         return "bg-blue-main";
       default:
@@ -33,25 +35,31 @@ const BtnEffectHover = ({ children, color = "primary-main", ...rest }) => {
     }
   };
 
+  useEffect(() => {
+    return () => {
+      setIsHover(false);
+    };
+  }, [color]);
+
   return (
     <Button
       onMouseEnter={handelMouseEnter}
       onMouseLeave={handelMouseLeave}
-      className={`relative overflow-hidden p-3 rounded-xl font-semibold uppercase text-white 
+      className={`relative overflow-hidden p-3 rounded-xl font-semibold uppercase text-white
         bg-white group`}
       {...rest}
     >
       <span
-        className={`absolute inset-0 w-full h-full transition-all duration-500 ease-in-out 
-          group-hover:w-0 group-hover:opacity-0 `}
-        style={{ backgroundColor: `${isHover ? "white" : getColor(color)}` }}
+        className={`absolute inset-0 w-0 h-full transition-all duration-500 ease-in-out opacity-0
+          group-hover:w-full group-hover:opacity-100 `}
+        style={{ backgroundColor: `${isHover ? getColor(color) : "white"}` }}
       ></span>
 
       {/* Texte (reste visible) */}
       <span
         className={`relative z-10 transition-all duration-500" 
         }`}
-        style={{ color: `${isHover ? getColor(color) : "white"}` }}
+        style={{ color: `${isHover ? "white" : getColor(color)} ` }}
       >
         {children}
       </span>
@@ -59,9 +67,9 @@ const BtnEffectHover = ({ children, color = "primary-main", ...rest }) => {
   );
 };
 
-BtnEffectHover.propTypes = {
+BtnEffectInverseHover.propTypes = {
   children: PropTypes.node.isRequired,
   color: PropTypes.string,
 };
 
-export default BtnEffectHover;
+export default BtnEffectInverseHover;
