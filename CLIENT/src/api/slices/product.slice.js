@@ -46,4 +46,5 @@ export const {
   useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,
+  useSearchProductsQuery,
 } = productSlice;

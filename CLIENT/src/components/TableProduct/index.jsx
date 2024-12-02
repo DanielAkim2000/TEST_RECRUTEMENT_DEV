@@ -12,12 +12,25 @@ import {
   Typography,
   CircularProgress,
 } from "@mui/material";
-import { useGetProductsQuery } from "../../api/slices/product.slice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setFormProduct } from "../../redux/slices/formProduct.slice";
+import { useSearchProductsQuery } from "../../api/slices/product.slice";
+import {
+  selectLimit,
+  selectPage,
+  selectSearch,
+} from "../../redux/slices/searchData.slice";
 
 const TableProducts = () => {
-  const { data: products, error, isLoading, isSuccess } = useGetProductsQuery();
+  const page = useSelector(selectPage);
+  const limit = useSelector(selectLimit);
+  const search = useSelector(selectSearch);
+  const {
+    data: filteredData,
+    error,
+    isLoading,
+    isSuccess,
+  } = useSearchProductsQuery({ search, page: page, limit });
   const dispatch = useDispatch();
 
   // useEffect(() => {
@@ -80,7 +93,7 @@ const TableProducts = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {products?.map((product, index) => (
+          {filteredData?.map((product, index) => (
             <TableRow
               key={product.id}
               sx={{
