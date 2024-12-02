@@ -10,9 +10,7 @@ import {
   IconButton,
   InputBase,
   List,
-  ListItem,
   ListItemButton,
-  ListItemText,
   Menu,
   MenuItem,
   styled,
@@ -24,6 +22,9 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 import LoginIcon from "@mui/icons-material/Login";
 import SearchIcon from "@mui/icons-material/Search";
 import PropTypes from "prop-types";
+import ButtonAdCategory from "../Button/ButtonAdCategory";
+import ButtonAdProduct from "../Button/ButtonAdProduct";
+import BtnSeeAllCategories from "../Button/BtnSeeAllCategories";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -90,21 +91,19 @@ const Header = (props) => {
   };
 
   const drawer = (
-    <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
-      <div className="items-center flex flex-row justify-center">
-        <Typography variant="h6" sx={{ my: 2 }}>
-          DEV TEACH
-        </Typography>
+    <Box sx={{ textAlign: "center" }}>
+      <div className="items-center flex flex-row justify-center my-5">
+        <span className="rounded-tl-[2rem] rounded-br-[2rem] rounded-tr-xl rounded-bl-xl bg-primary-main text-white px-3 font-extrabold">
+          Prodify
+        </span>
       </div>
       <Divider />
       <List>
-        {navItems.map((item) => (
-          <ListItem key={item} disablePadding>
-            <ListItemButton sx={{ textAlign: "center" }}>
-              <ListItemText primary={item} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+        <ListItemButton>
+          <ButtonAdCategory />
+        </ListItemButton>
+        <ButtonAdProduct />
+        <BtnSeeAllCategories />
       </List>
     </Box>
   );
@@ -114,18 +113,13 @@ const Header = (props) => {
   return (
     <>
       <AppBar position="sticky">
-        <Container maxWidth="xl">
+        <Container
+          maxWidth="xl"
+          sx={{
+            overflow: "hidden",
+          }}
+        >
           <Toolbar disableGutters>
-            <Typography
-              variant="h6"
-              noWrap
-              component="a"
-              href="/"
-              className="text-nunito"
-              sx={styles.textLogo}
-            >
-              DEV TEACH
-            </Typography>
             <Box sx={styles.boxMenu} alignItems={"center"}>
               <IconButton
                 size="large"
@@ -133,6 +127,7 @@ const Header = (props) => {
                 aria-haspopup="true"
                 onClick={handleDrawerToggle}
                 color="inherit"
+                className="sm:!hidden"
               >
                 <MenuIcon />
               </IconButton>
@@ -143,18 +138,8 @@ const Header = (props) => {
                 href="/"
                 sx={styles.textLogoMenu}
               >
-                DEV TEACH
+                PRODIFY
               </Typography>
-            </Box>
-            <Box sx={styles.listPages}>
-              {pages.map((page) => (
-                <Button
-                  key={page}
-                  sx={{ my: 2, color: "white", display: "block" }}
-                >
-                  {page}
-                </Button>
-              ))}
             </Box>
             <Search>
               <SearchIconWrapper>
@@ -164,9 +149,10 @@ const Header = (props) => {
                 placeholder="Search…"
                 inputProps={{ "aria-label": "search" }}
                 className="ml-auto"
+                onChange={(e) => console.log(e.target.value)}
               />
             </Search>
-            <div className="ml-2">
+            <div className="ml-auto">
               {auth ? (
                 <div>
                   <IconButton
@@ -236,16 +222,19 @@ const styles = {
     color: "inherit",
     textDecoration: "none",
   },
-  boxMenu: { display: { xs: "flex", md: "none", flexGrow: 1 } },
+  boxMenu: {
+    display: "flex",
+    alignItems: "center",
+  },
   textLogoMenu: {
-    display: { xs: "none", sm: "flex", md: "none" },
     mr: 2,
     fontWeight: 700,
     letterSpacing: ".3rem",
     color: "inherit",
     textDecoration: "none",
+    // media queries
+    display: { xs: "none", sm: "flex" },
   },
-  listPages: { flexGrow: 1, display: { xs: "none", md: "flex" } },
   drawer: {
     display: { sm: "block", md: "none" },
     "& .MuiDrawer-paper": {

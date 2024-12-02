@@ -28,14 +28,32 @@ const SelectCategories = () => {
 
   console.log("category", category);
 
+  const testCategory = (category) => {
+    if (categories.find((cat) => cat.id === category?.id)) {
+      return true;
+    }
+    return false;
+  };
+
+  const checkCategory = () => {
+    if (!testCategory(category)) {
+      return true;
+    }
+    return false;
+  };
+
   return (
     <FormControl fullWidth>
-      <InputLabel id="demo-simple-select-label">Catégorie</InputLabel>
+      <InputLabel id="demo-simple-select-label" error={checkCategory()}>
+        Catégorie
+      </InputLabel>
       <Select
         labelId="demo-simple-select-label"
         id="demo-simple-select"
         value={category?.id || 0}
         label="Catégorie"
+        error={checkCategory()}
+        helperText={checkCategory() ? "Veuillez choisir une catégorie" : ""}
         onChange={handleChange}
       >
         <MenuItem value={0}>Choisissez une catégorie</MenuItem>

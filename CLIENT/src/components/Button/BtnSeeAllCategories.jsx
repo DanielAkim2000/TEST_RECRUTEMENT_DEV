@@ -44,7 +44,7 @@ const RenderRow = (props) => {
   const formCategory = useSelector(selectFormCategory);
   const [open, setOpen] = React.useState(false);
 
-  const [updateCategory, { isLoading, isError, isSuccess }] =
+  const [updateCategory, { isLoading: isUpdating }] =
     useUpdateCategoryMutation();
   const dispatch = useDispatch();
   const { openSnackbar } = useSnackBar();
@@ -103,16 +103,11 @@ const RenderRow = (props) => {
               <CreateIcon />
             </IconButton>
           )}
-          {edit &&
-            (isLoading ? (
-              <IconButton>
-                <SaveAsIcon />
-              </IconButton>
-            ) : (
-              <IconButton onClick={handleSubmit}>
-                <Spinner isLoading={isLoading} content={<SaveAsIcon />} />
-              </IconButton>
-            ))}
+          {edit && (
+            <IconButton onClick={handleSubmit}>
+              <Spinner isLoading={isUpdating} content={<SaveAsIcon />} />
+            </IconButton>
+          )}
           <IconButton onClick={handleOpen}>
             <DeleteIcon />
           </IconButton>

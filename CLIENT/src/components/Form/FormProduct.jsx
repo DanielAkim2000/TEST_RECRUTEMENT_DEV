@@ -1,14 +1,13 @@
+import React, { useState, useEffect } from "react";
 import { Box, TextField, Button } from "@mui/material";
-import React, { useEffect } from "react";
 import SelectCategories from "../Select/SelectCategories";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
   selectFormProduct,
   setDescription,
   setName,
   setPrice,
 } from "../../redux/slices/formProduct.slice";
-import { useDispatch } from "react-redux";
 import {
   useCreateProductMutation,
   useUpdateProductMutation,
@@ -22,12 +21,17 @@ const FormProduct = (props) => {
   const { name, price, description, id } = product;
   const dispatch = useDispatch();
   const { openSnackbar } = useSnackBar();
-  const [updateProduct, { isLoading, isError, isSuccess, error }] =
-    useUpdateProductMutation();
-  const [
-    createProduct,
-    { isLoading: isLoadingAdd, isError: isErrorAdd, isSuccess: isSuccessAdd },
-  ] = useCreateProductMutation();
+
+  const [updateProduct, { isLoading, isSuccess }] = useUpdateProductMutation();
+  const [createProduct, { isLoading: isLoadingAdd, isSuccess: isSuccessAdd }] =
+    useCreateProductMutation();
+
+  // État pour suivre si l'utilisateur a interagi avec les champs
+  const [touched, setTouched] = useState({
+    name: false,
+    price: false,
+    description: false,
+  });
 
   useEffect(() => {
     if (isSuccess || isSuccessAdd) {
@@ -36,7 +40,24 @@ const FormProduct = (props) => {
     }
   }, [isSuccess, isSuccessAdd, props, openSnackbar]);
 
-  console.log("product", product);
+  const checkError = (field) => {
+    switch (field) {
+      case "name":
+        return name?.length < 3 || name?.length > 255;
+      case "price":
+        return price <= 0 || price > 1000000 || !price;
+      case "description":
+        return description?.length < 3 || description?.length > 1024;
+      default:
+        return false;
+    }
+  };
+
+  const hasError = (field) => touched[field] && checkError(field);
+
+  const isSubmitDisabled = () =>
+    checkError("name") || checkError("price") || checkError("description");
+
   return (
     <Box
       component="form"
@@ -49,39 +70,61 @@ const FormProduct = (props) => {
       onSubmit={async (e) => {
         e.preventDefault();
         if (id) {
-          const res = await updateProduct(product);
-          console.log("res", res);
-          console.log("error", error);
+          await updateProduct(product);
         } else {
-          const res = await createProduct(product);
-          console.log(res);
-          console.log("error", error);
+          await createProduct(product);
         }
       }}
     >
       <TextField
         variant="outlined"
+        error={hasError("name")}
+        helperText={
+          hasError("name")
+            ? "Le nom doit contenir entre 3 et 255 caractères"
+            : ""
+        }
         label="Nom"
         value={name}
+        onFocus={() => setTouched({ ...touched, name: true })}
         onChange={(e) => dispatch(setName(e.target.value))}
       />
       <TextField
         variant="outlined"
+        error={hasError("price")}
+        helperText={
+          hasError("price")
+            ? "Le prix doit être compris entre 0 et 1000000"
+            : ""
+        }
         label="Prix"
         type="number"
         value={price}
+        onFocus={() => setTouched({ ...touched, price: true })}
         onChange={(e) => dispatch(setPrice(parseFloat(e.target.value)))}
       />
       <TextField
         multiline
+        error={hasError("description")}
+        helperText={
+          hasError("description")
+            ? "La description doit contenir entre 3 et 1024 caractères"
+            : ""
+        }
         rows={4}
         variant="outlined"
         label="Description"
         value={description}
+        onFocus={() => setTouched({ ...touched, description: true })}
         onChange={(e) => dispatch(setDescription(e.target.value))}
       />
       <SelectCategories />
-      <Button variant="contained" color="primary" type="submit">
+      <Button
+        variant="contained"
+        color="primary"
+        type="submit"
+        disabled={isSubmitDisabled()}
+      >
         {id ? (
           <Spinner isLoading={isLoading} content="Modifier" />
         ) : (
