@@ -13,6 +13,7 @@ import { useDeleteProductMutation } from "../../api/slices/product.slice";
 import { useEffect } from "react";
 import useSnackBar from "../../hooks/useSnackBar";
 import PropTypes from "prop-types";
+import Spinner from "../Spinner";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -65,7 +66,7 @@ const ButtonDelete = ({ product }) => {
         <DialogActions>
           <Button onClick={handleClose}>Annuler</Button>
           <Button onClick={handleDelete} className="!text-red-500">
-            Supprimer
+            <Spinner isLoading={isLoading} content={"Supprimer"} />
           </Button>
         </DialogActions>
       </Dialog>

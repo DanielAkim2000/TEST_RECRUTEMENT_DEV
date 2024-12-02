@@ -10,9 +10,9 @@ const productSlice = api.injectEndpoints({
       query: (id) => `/api/product/${id}`,
     }),
     searchProducts: builder.query({
-      query: (search, page, limit) =>
-        `/api/products?search=${search}&page=${page}&limit=${limit}`,
-      providesTags: ["Products"],
+      query: ({ search, page, limit }) =>
+        `/api/products/search?search=${search}&page=${page}&limit=${limit}`,
+      providesTags: ["ProductsFilteredList"],
     }),
     createProduct: builder.mutation({
       query: (product) => ({

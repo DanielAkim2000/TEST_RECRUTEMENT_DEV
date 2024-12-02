@@ -13,7 +13,11 @@ const ButtonAdCategory = () => {
   };
   const handleClose = () => {
     setOpen(false);
-    dispatch(resetFormCategory());
+    const timer = setTimeout(() => {
+      dispatch(resetFormCategory());
+    }, 500);
+
+    return () => clearTimeout(timer);
   };
 
   return (

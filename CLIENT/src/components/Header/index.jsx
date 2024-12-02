@@ -1,73 +1,26 @@
 import React from "react";
 import {
-  alpha,
   AppBar,
   Box,
-  Button,
   Container,
   Divider,
   Drawer,
   IconButton,
-  InputBase,
   List,
   ListItemButton,
   Menu,
   MenuItem,
-  styled,
   Toolbar,
   Typography,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import LoginIcon from "@mui/icons-material/Login";
-import SearchIcon from "@mui/icons-material/Search";
 import PropTypes from "prop-types";
 import ButtonAdCategory from "../Button/ButtonAdCategory";
 import ButtonAdProduct from "../Button/ButtonAdProduct";
 import BtnSeeAllCategories from "../Button/BtnSeeAllCategories";
-
-const Search = styled("div")(({ theme }) => ({
-  position: "relative",
-  borderRadius: 10,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginLeft: 0,
-  width: "100%",
-  [theme.breakpoints.up("sm")]: {
-    marginLeft: theme.spacing(1),
-    width: "auto",
-  },
-}));
-
-const SearchIconWrapper = styled("div")(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: "100%",
-  position: "absolute",
-  pointerEvents: "none",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: "inherit",
-  width: "100%",
-  borderRadius: theme.shape.borderRadius,
-  "& .MuiInputBase-input": {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create("width"),
-    [theme.breakpoints.up("sm")]: {
-      width: "12ch",
-      "&:focus": {
-        width: "30ch",
-      },
-    },
-  },
-}));
+import InputSearchProductByName from "../Input/InputSearchProductByName";
 
 const pages = ["Produits", "Categories"];
 const navItems = ["Produits", "Categories"];
@@ -141,17 +94,7 @@ const Header = (props) => {
                 PRODIFY
               </Typography>
             </Box>
-            <Search>
-              <SearchIconWrapper>
-                <SearchIcon />
-              </SearchIconWrapper>
-              <StyledInputBase
-                placeholder="Search…"
-                inputProps={{ "aria-label": "search" }}
-                className="ml-auto"
-                onChange={(e) => console.log(e.target.value)}
-              />
-            </Search>
+            <InputSearchProductByName />
             <div className="ml-auto">
               {auth ? (
                 <div>

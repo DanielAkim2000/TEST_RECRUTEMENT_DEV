@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import ButtonDelete from "../Button/ButtonDelete";
 import ButtonModify from "../Button/ButtonModify";
 import {
@@ -22,15 +22,26 @@ import {
 } from "../../redux/slices/searchData.slice";
 
 const TableProducts = () => {
-  const page = useSelector(selectPage);
-  const limit = useSelector(selectLimit);
-  const search = useSelector(selectSearch);
+  const page = useSelector(selectPage) || 1;
+  const limit = useSelector(selectLimit) || 5;
+  const search = useSelector(selectSearch) || "";
+
+  const safeSearch = typeof search === "string" ? search : "";
+  const safeLimit = typeof limit === "number" ? limit : 5;
+  const safePage = typeof page === "number" ? page : 1;
+
   const {
     data: filteredData,
     error,
     isLoading,
     isSuccess,
-  } = useSearchProductsQuery({ search, page: page, limit });
+    isFetching,
+    refetch,
+  } = useSearchProductsQuery({
+    search: safeSearch,
+    page: safePage,
+    limit: safeLimit,
+  });
   const dispatch = useDispatch();
 
   // useEffect(() => {
@@ -39,13 +50,11 @@ const TableProducts = () => {
   //   }
   // }, [isSuccess, products, dispatch]);
 
-  if (isLoading) {
-    return (
-      <TableContainer component={Paper} sx={{ p: 3, textAlign: "center" }}>
-        <CircularProgress />
-      </TableContainer>
-    );
-  }
+  useEffect(() => {
+    refetch();
+  }, [search, page, limit, refetch]);
+
+  console.log("isLoading", isLoading);
 
   if (error) {
     return (
@@ -93,47 +102,61 @@ const TableProducts = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {filteredData?.map((product, index) => (
-            <TableRow
-              key={product.id}
-              sx={{
-                "&:nth-of-type(odd)": {
-                  backgroundColor: "#f9f9f9",
-                },
-                "&:hover": {
-                  backgroundColor: "#f1f1f1",
-                },
-              }}
-            >
-              <TableCell>{index + 1}</TableCell>
-              <TableCell>{product.name}</TableCell>
-              <TableCell>{`${product.price} €`}</TableCell>
-              <TableCell>{product.description}</TableCell>
-              <TableCell>{product.category.name}</TableCell>
-              <TableCell>
-                {new Date(product.createdAt).toLocaleDateString("fr-FR", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </TableCell>
-              <TableCell
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  flexBasis: "100%",
-                  gap: 1,
-                }}
-              >
-                <ButtonModify
-                  onClick={() => {
-                    dispatch(setFormProduct(product));
-                  }}
-                />
-                <ButtonDelete product={product} />
+          {isFetching ? (
+            <TableRow sx={{ justifyContent: "center" }}>
+              <TableCell colSpan={7} align="center">
+                <CircularProgress />
               </TableCell>
             </TableRow>
-          ))}
+          ) : filteredData?.products.length > 0 ? (
+            filteredData.products.map((product, index) => (
+              <TableRow
+                key={product.id}
+                sx={{
+                  "&:nth-of-type(odd)": {
+                    backgroundColor: "#f9f9f9",
+                  },
+                  "&:hover": {
+                    backgroundColor: "#f1f1f1",
+                  },
+                }}
+              >
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>{product.name}</TableCell>
+                <TableCell>{`${product.price} €`}</TableCell>
+                <TableCell>{product.description}</TableCell>
+                <TableCell>{product.category.name}</TableCell>
+                <TableCell>
+                  {new Date(product.createdAt).toLocaleDateString("fr-FR", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </TableCell>
+                <TableCell
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    flexBasis: "100%",
+                    gap: 1,
+                  }}
+                >
+                  <ButtonModify
+                    onClick={() => {
+                      dispatch(setFormProduct(product));
+                    }}
+                  />
+                  <ButtonDelete product={product} />
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={7} align="center">
+                <Typography>Aucun produit trouvé</Typography>
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </TableContainer>

@@ -15,7 +15,11 @@ const ButtonModify = (props) => {
   };
   const handleClose = () => {
     setOpen(false);
-    dispatch(resetFormProduct());
+    const timer = setTimeout(() => {
+      dispatch(resetFormProduct());
+    }, 500);
+
+    return () => clearTimeout(timer);
   };
 
   return (

@@ -71,7 +71,15 @@ const RenderRow = (props) => {
       );
     }
     setEdit(false);
-    dispatch(resetFormCategory());
+    /**j ai rajoute le setTimeout le temps que setEdit(false) soit pris en compte et que le formulaire
+     *soit bien caché sinon le dispatch se fait et vu que le form est touche et
+     *et reintialise l erreur de longueur du nom apparait vu que le nom est vide ""
+     */
+    const timer = setTimeout(() => {
+      dispatch(resetFormCategory());
+    }, 500);
+
+    return () => clearTimeout(timer);
   };
 
   const handleClose = () => {
