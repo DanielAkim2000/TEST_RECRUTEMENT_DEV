@@ -6,6 +6,7 @@ use App\Entity\Category;
 use App\Entity\Product;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,6 +18,7 @@ class ProductController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
     private ValidatorInterface $validator;
+    private LoggerInterface $logger;
 
     private const PRODUCT_ROUTE = '/product/{id}';
     private const MESSAGE_PRODUCT_NOT_FOUND = 'Produit non trouvé';
@@ -25,10 +27,11 @@ class ProductController extends AbstractController
 
 
 
-    public function __construct(EntityManagerInterface $entityManager, ValidatorInterface $validator)
+    public function __construct(EntityManagerInterface $entityManager, ValidatorInterface $validator, LoggerInterface $logger)
     {
         $this->entityManager = $entityManager;
         $this->validator = $validator;
+        $this->logger = $logger;
     }
 
 
@@ -74,16 +77,14 @@ class ProductController extends AbstractController
             $product = new Product();
             $product->setName($data['name']);
             $product->setDescription($data['description']);
-            if (is_float($data['price'])) {
-                $product->setPrice($data['price']);
-            }
+            $product->setPrice($data['price']);
             // definition de la date de creation
             $newDate = new DateTimeImmutable();
             $product->setCreatedAt($newDate);
 
             //on verifie si la categorie existe
-            if (isset($data['category_id'])) {
-                $category = $this->entityManager->getRepository(Category::class)->find($data['category_id']);
+            if (isset($data['category']['id'])) {
+                $category = $this->entityManager->getRepository(Category::class)->find($data['category']['id']);
                 if ($category) {
                     $product->setCategory($category);
                 }
