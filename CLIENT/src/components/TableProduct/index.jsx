@@ -23,7 +23,6 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useDispatch, useSelector } from "react-redux";
-import { setFormProduct } from "../../redux/slices/formProduct.slice";
 import {
   useDeleteProductsMutation,
   useSearchProductsQuery,
@@ -85,8 +84,6 @@ const TableProducts = () => {
 
   const handleChanged = (event) => {
     const { value, checked } = event.target;
-    console.log("value", value);
-    console.log("checked", checked);
     if (value === "all") {
       if (checked) {
         setProductsSelected(filteredData.products.map((product) => product.id));
@@ -260,11 +257,7 @@ const TableProducts = () => {
                     gap: 1,
                   }}
                 >
-                  <ButtonModify
-                    onClick={() => {
-                      dispatch(setFormProduct(product));
-                    }}
-                  />
+                  <ButtonModify />
                   <ButtonDelete product={product} />
                 </TableCell>
               </TableRow>

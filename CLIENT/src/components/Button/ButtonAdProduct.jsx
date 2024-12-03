@@ -1,15 +1,22 @@
 import React from "react";
 import { Box, Modal, Typography } from "@mui/material";
 import FormProduct from "../Form/FormProduct";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { resetFormProduct } from "../../redux/slices/formProduct.slice";
 import BtnEffectInverseHover from "./BtnEffectInverseHover";
+import { selectIsAuthenticated } from "../../redux/slices/auth.slice";
+import { setOpenFormLogin } from "../../redux/slices/formLogin.slice";
 
 const ButtonAdProduct = () => {
   const dispatch = useDispatch();
   const [open, setOpen] = React.useState(false);
+  const isAuth = useSelector(selectIsAuthenticated);
   const handleOpen = () => {
-    setOpen(true);
+    if (!isAuth) {
+      return dispatch(setOpenFormLogin(true));
+    } else {
+      setOpen(true);
+    }
   };
   const handleClose = () => {
     setOpen(false);

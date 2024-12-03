@@ -1,17 +1,23 @@
 import { Box, Modal, Typography } from "@mui/material";
 import React from "react";
 import FormProduct from "../Form/FormProduct";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { resetFormProduct } from "../../redux/slices/formProduct.slice";
 import PropTypes from "prop-types";
 import BtnEffectHover from "./BtnEffectHover";
+import { selectIsAuthenticated } from "../../redux/slices/auth.slice";
+import { setOpenFormLogin } from "../../redux/slices/formLogin.slice";
 
 const ButtonModify = (props) => {
   const dispatch = useDispatch();
+  const isAuth = useSelector(selectIsAuthenticated);
   const [open, setOpen] = React.useState(false);
-  const handleOpen = () => {
-    props.onClick();
-    setOpen(true);
+  const handleOpen = async () => {
+    if (!isAuth) {
+      return dispatch(setOpenFormLogin(true));
+    } else {
+      setOpen(true);
+    }
   };
   const handleClose = () => {
     setOpen(false);

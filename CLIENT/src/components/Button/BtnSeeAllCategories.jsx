@@ -41,6 +41,8 @@ import {
   setData,
   setOffset,
 } from "../../redux/slices/scrollInifinite.slice";
+import { setOpenFormLogin } from "../../redux/slices/formLogin.slice";
+import { selectIsAuthenticated } from "../../redux/slices/auth.slice";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -52,6 +54,7 @@ const RenderRow = (props) => {
   const [edit, setEdit] = useState(false);
   const formCategory = useSelector(selectFormCategory);
   const [open, setOpen] = React.useState(false);
+  const isAuth = useSelector(selectIsAuthenticated);
 
   const [updateCategory, { isLoading: isUpdating }] =
     useUpdateCategoryMutation();
@@ -61,12 +64,16 @@ const RenderRow = (props) => {
     useDeleteCategoryMutation();
 
   const handleEdit = () => {
-    // pour empêcher la modification de plusieurs catégories en même temps
-    if (formCategory.name !== "") {
-      return;
+    if (!isAuth) {
+      return dispatch(setOpenFormLogin(true));
+    } else {
+      // pour empêcher la modification de plusieurs catégories en même temps
+      if (formCategory.name !== "") {
+        return;
+      }
+      dispatch(setFormCategory(data[index]));
+      setEdit(true);
     }
-    dispatch(setFormCategory(data[index]));
-    setEdit(true);
   };
 
   const handleSubmit = async () => {
@@ -97,8 +104,12 @@ const RenderRow = (props) => {
     setOpen(false);
   };
 
-  const handleOpen = () => {
-    setOpen(true);
+  const handleOpen = async () => {
+    if (!isAuth) {
+      return dispatch(setOpenFormLogin(true));
+    } else {
+      setOpen(true);
+    }
   };
 
   const handleDelete = async () => {

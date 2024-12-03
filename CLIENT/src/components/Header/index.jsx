@@ -8,19 +8,19 @@ import {
   IconButton,
   List,
   ListItemButton,
-  Menu,
-  MenuItem,
   Toolbar,
   Typography,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import AccountCircle from "@mui/icons-material/AccountCircle";
 import PropTypes from "prop-types";
 import ButtonAdCategory from "../Button/ButtonAdCategory";
 import ButtonAdProduct from "../Button/ButtonAdProduct";
 import BtnSeeAllCategories from "../Button/BtnSeeAllCategories";
 import InputSearchProductByName from "../Input/InputSearchProductByName";
-import BtnLogin from "../Button/BtnLogin";
+import BtnLoginOrRegister from "../Button/BtnLoginOrRegister";
+import { useSelector } from "react-redux";
+import { selectIsAuthenticated } from "../../redux/slices/auth.slice";
+import BtnLogout from "../Button/BtnLogout";
 
 const pages = ["Produits", "Categories"];
 const navItems = ["Produits", "Categories"];
@@ -28,19 +28,11 @@ const drawerWidth = 240;
 
 const Header = (props) => {
   const { window } = props;
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [auth, setAuth] = React.useState(false);
+  const isAuth = useSelector(selectIsAuthenticated);
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen((prevState) => !prevState);
-  };
-
-  const handleMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
   };
 
   const drawer = (
@@ -96,40 +88,13 @@ const Header = (props) => {
             </Box>
             <InputSearchProductByName />
             <div className="ml-auto">
-              {auth ? (
+              {isAuth ? (
                 <div>
-                  <IconButton
-                    size="large"
-                    aria-label="account of current user"
-                    aria-controls="menu-appbar"
-                    aria-haspopup="true"
-                    onClick={handleMenu}
-                    color="inherit"
-                  >
-                    <AccountCircle />
-                  </IconButton>
-                  <Menu
-                    id="menu-appbar"
-                    anchorEl={anchorEl}
-                    anchorOrigin={{
-                      vertical: "top",
-                      horizontal: "right",
-                    }}
-                    keepMounted
-                    transformOrigin={{
-                      vertical: "top",
-                      horizontal: "right",
-                    }}
-                    open={Boolean(anchorEl)}
-                    onClose={handleClose}
-                  >
-                    <MenuItem onClick={handleClose}>Mon Compte</MenuItem>
-                    <MenuItem onClick={handleClose}>Déconnexion</MenuItem>
-                  </Menu>
+                  <BtnLogout />
                 </div>
               ) : (
                 <div>
-                  <BtnLogin />
+                  <BtnLoginOrRegister />
                 </div>
               )}
             </div>

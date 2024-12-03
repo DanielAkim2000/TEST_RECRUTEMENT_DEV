@@ -13,6 +13,9 @@ import { useDeleteProductMutation } from "../../api/slices/product.slice";
 import useSnackBar from "../../hooks/useSnackBar";
 import PropTypes from "prop-types";
 import Spinner from "../Spinner";
+import { useDispatch, useSelector } from "react-redux";
+import { selectIsAuthenticated } from "../../redux/slices/auth.slice";
+import { setOpenFormLogin } from "../../redux/slices/formLogin.slice";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -21,10 +24,16 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 const ButtonDelete = ({ product }) => {
   const [open, setOpen] = React.useState(false);
   const { openSnackbar } = useSnackBar();
+  const isAuth = useSelector(selectIsAuthenticated);
+  const dispatch = useDispatch();
   const [deleteProduct, { isSuccess, isError, isLoading }] =
     useDeleteProductMutation();
   const handleClickOpen = () => {
-    setOpen(true);
+    if (!isAuth) {
+      return dispatch(setOpenFormLogin(true));
+    } else {
+      setOpen(true);
+    }
   };
 
   const handleClose = () => {

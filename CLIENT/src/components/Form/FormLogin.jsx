@@ -1,25 +1,55 @@
-import { Button, FormControl, TextField } from "@mui/material";
+import { Button, FormControl, TextField, Typography } from "@mui/material";
 import React from "react";
 import Spinner from "../Spinner";
 import {
   useLoginMutation,
   useRegisterMutation,
 } from "../../api/slices/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import useSnackbar from "../../hooks/useSnackbar";
+import { setAuthenticated, setToken } from "../../redux/slices/auth.slice";
+import {
+  selectEmail,
+  selectFirstName,
+  selectName,
+  selectPassword,
+  selectType,
+  setEmail as setEmailFormLogin,
+  setFirstName as setFirstNameFormLogin,
+  setName as setNameFormLogin,
+  setPassword as setPasswordFormLogin,
+  setType as setTypeFormLogin,
+  handleClose as handleCloseFormLogin,
+} from "../../redux/slices/formLogin.slice";
 
-const FormLogin = ({ handleClose, type }) => {
+const FormLogin = () => {
   const [register, { isLoading, isError }] = useRegisterMutation();
   const [login, { isLoading: isLoadingLogin }] = useLoginMutation();
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [name, setName] = React.useState("");
-  const [firstname, setFirstname] = React.useState("");
+  const dispatch = useDispatch();
+  // const [email, setEmail] = React.useState("");
+  const email = useSelector(selectEmail);
+  // const [password, setPassword] = React.useState("");
+  const password = useSelector(selectPassword);
+  // const [name, setName] = React.useState("");
+  const name = useSelector(selectName);
+  // const [firstname, setFirstname] = React.useState("");
+  const firstname = useSelector(selectFirstName);
+  const type = useSelector(selectType);
+  const setType = (value) => dispatch(setTypeFormLogin(value));
+
+  const setName = (value) => dispatch(setNameFormLogin(value));
+  const setFirstname = (value) => dispatch(setFirstNameFormLogin(value));
+  const setEmail = (value) => dispatch(setEmailFormLogin(value));
+  const setPassword = (value) => dispatch(setPasswordFormLogin(value));
+  const handleClose = () => dispatch(handleCloseFormLogin());
+
   const { openSnackbar } = useSnackbar();
 
   const [helperText, setHelperText] = React.useState({
-    email: "",
-    password: "",
-    name: "",
-    firstname: "",
+    email: [],
+    password: [],
+    name: [],
+    firstname: [],
   });
 
   const renderBtnText = () => {
@@ -29,7 +59,16 @@ const FormLogin = ({ handleClose, type }) => {
     return "Créer un compte";
   };
   const disabledBtn = () => {
-    return isLoading || isLoadingLogin || !checkEmail() || !checkPassword();
+    switch (type) {
+      case "login":
+        return !checkEmail() || !checkPassword();
+      case "register":
+        return (
+          !checkEmail() || !checkPassword() || !checkName() || !checkFirstname()
+        );
+      default:
+        return true;
+    }
   };
 
   const checkEmail = () => {
@@ -38,31 +77,34 @@ const FormLogin = ({ handleClose, type }) => {
   };
 
   const checkName = () => {
-    const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    return regex.test(name) && name.length >= 2;
+    //verifier si le nom contient des chiffres
+    const regex = /^[a-zA-Z]+$/;
+    return regex.test(name) && name.length > 2;
   };
 
   const checkFirstname = () => {
-    const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    return regex.test(firstname) && firstname.length >= 2;
+    const regex = /^[a-zA-Z]+$/;
+    return regex.test(firstname) && firstname.length > 2;
   };
 
   const checkPassword = () => {
-    return password.length >= 8;
+    // verifie si le mot de passe contient au moins 8 caractères, une lettre majuscule, une lettre minuscule et un chiffre
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    return password.length > 8 && regex.test(password);
   };
 
-  const checkInput = (input) => {
-    switch (input) {
+  const checkInput = (type) => {
+    switch (type) {
       case "email":
         if (!checkEmail()) {
           setHelperText({
             ...helperText,
-            email: "Email invalide",
+            email: ["Email invalide"],
           });
         } else {
           setHelperText({
             ...helperText,
-            email: "",
+            email: [],
           });
         }
         break;
@@ -70,38 +112,43 @@ const FormLogin = ({ handleClose, type }) => {
         if (!checkPassword()) {
           setHelperText({
             ...helperText,
-            password: "Le mot de passe doit contenir au moins 8 caractères",
+            password: [
+              "Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule et un chiffre",
+            ],
           });
         } else {
           setHelperText({
-            ...helperText,
-            password: "",
+            password: [],
           });
         }
         break;
       case "name":
-        if (name.length < 2) {
+        if (!checkName()) {
           setHelperText({
             ...helperText,
-            name: "Le nom doit contenir au moins 2 caractères",
+            name: [
+              "Votre nom doit contenir que des lettres et au moins 3 caractères",
+            ],
           });
         } else {
           setHelperText({
             ...helperText,
-            name: "",
+            name: [],
           });
         }
         break;
       case "firstname":
-        if (firstname.length < 2) {
+        if (!checkFirstname()) {
           setHelperText({
             ...helperText,
-            firstname: "Le prénom doit contenir au moins 2 caractères",
+            firstname: [
+              "Votre prénom doit contenir que des lettres et au moins 3 caractères",
+            ],
           });
         } else {
           setHelperText({
             ...helperText,
-            firstname: "",
+            firstname: [],
           });
         }
         break;
@@ -110,61 +157,111 @@ const FormLogin = ({ handleClose, type }) => {
     }
   };
 
-  const verifyErrors = (violations) => {
-    violations.forEach((violation) => {
-      if (violation.propertyPath === "email") {
-        setHelperText({
-          ...helperText,
-          email: violation.template,
-        });
-      }
-      if (violation.propertyPath === "password") {
-        setHelperText({
-          ...helperText,
-          password: violation.template,
-        });
-      }
-      if (violation.propertyPath === "name") {
-        setHelperText({
-          ...helperText,
-          name: violation.template,
-        });
-      }
-      if (violation.propertyPath === "firstname") {
-        setHelperText({
-          ...helperText,
-          firstname: violation.template,
-        });
-      }
+  const verifyErrors = async (violations) => {
+    setHelperText({
+      email: [],
+      password: [],
+      name: [],
+      firstname: [],
     });
+
+    const violationsGrouped = violations.reduce(
+      (acc, violation) => {
+        const { propertyPath, title } = violation;
+
+        if (propertyPath === "email") acc.email.push(title);
+        if (propertyPath === "password") acc.password.push(title);
+        if (propertyPath === "nom") acc.name.push(title);
+        if (propertyPath === "prenom") acc.firstname.push(title);
+
+        return acc;
+      },
+      { email: [], password: [], name: [], firstname: [] }
+    );
+
+    setHelperText((prevHelperText) => ({
+      ...prevHelperText,
+      ...violationsGrouped,
+    }));
   };
 
   const handleSubmit = async () => {
     try {
       if (type === "login") {
-        const res = await login({ email, password });
+        // LOGIN
+        const trimInfo = {
+          email: email.trim(),
+          password: password.trim(),
+        };
+        const res = await login(trimInfo);
         if (res?.error?.data) {
           const violations = res.error.data.violations;
-          verifyErrors(violations);
+          verifyErrors(violations).then(() => {
+            console.log("violations", violations);
+          });
+          if (res.error?.status === 401) {
+            setHelperText({
+              email: ["Email ou mot de passe incorrect"],
+              password: ["Email ou mot de passe incorrect"],
+            });
+          }
+          if (res.error?.status === 400) {
+            setHelperText({
+              email: ["Email ou mot de passe incorrect"],
+              password: ["Email ou mot de passe incorrect"],
+            });
+          }
+          if (res.error?.status === 500) {
+            openSnackbar("Une erreur est survenue", "error");
+          }
         }
-        if (res?.data?.message) {
-          openSnackbar(res.data.message, res.data.serverity);
+        if (res?.data?.token) {
+          console.log("res", res);
+          openSnackbar("Connexion réussie", "success");
+          dispatch(setToken(res.data.token));
+          dispatch(setAuthenticated(true));
           handleClose();
         }
       } else {
-        const res = await register({ email, password });
+        // REGISTER
+        const trimInfo = {
+          email: email.trim(),
+          password: password.trim(),
+          name: name.trim(),
+          firstname: firstname.trim(),
+        };
+        const res = await register(trimInfo);
         if (res?.error?.data) {
+          console.log("res", res);
           const violations = res.error.data.violations;
-          verifyErrors(violations);
+          verifyErrors(violations).then(() => {
+            console.log("violations", violations);
+          });
         }
         if (res?.data?.message) {
+          console.log("res", res);
           openSnackbar(res.data.message, res.data.serverity);
-          handleClose();
+          setType("login");
         }
       }
     } catch (error) {
       console.log("error", error);
     }
+  };
+
+  const handleChangeType = () => {
+    // Reset input
+    setEmail("");
+    setPassword("");
+    setName("");
+    setFirstname("");
+    setHelperText({
+      email: "",
+      password: "",
+      name: "",
+      firstname: "",
+    });
+    setType(type === "login" ? "register" : "login");
   };
 
   return (
@@ -189,8 +286,10 @@ const FormLogin = ({ handleClose, type }) => {
                 checkInput("name");
               }}
               onBlur={() => checkInput("name")}
-              error={helperText.name !== ""}
-              helperText={helperText.name}
+              error={helperText.name?.length > 0}
+              helperText={
+                helperText.name?.length > 0 && helperText.name.join(", ")
+              }
             />
             <TextField
               label="Prénom"
@@ -204,8 +303,11 @@ const FormLogin = ({ handleClose, type }) => {
                 checkInput("firstname");
               }}
               onBlur={() => checkInput("firstname")}
-              error={helperText.firstname !== ""}
-              helperText={helperText.firstname}
+              error={helperText.firstname?.length > 0}
+              helperText={
+                helperText.firstname?.length > 0 &&
+                helperText.firstname.join(", ")
+              }
             />
           </>
         )}
@@ -221,8 +323,10 @@ const FormLogin = ({ handleClose, type }) => {
             checkInput("email");
           }}
           onBlur={() => checkInput("email")}
-          error={helperText.email !== ""}
-          helperText={helperText.email}
+          error={helperText.email?.length > 0}
+          helperText={
+            helperText.email?.length > 0 && helperText.email.join(", ")
+          }
         />
         <TextField
           label="Password"
@@ -236,8 +340,10 @@ const FormLogin = ({ handleClose, type }) => {
             checkInput("password");
           }}
           onBlur={() => checkInput("password")}
-          error={helperText.password !== ""}
-          helperText={helperText.password}
+          error={helperText.password?.length > 0}
+          helperText={
+            helperText.password?.length > 0 && helperText.password.join(", ")
+          }
         />
         <Button
           variant="contained"
@@ -247,8 +353,27 @@ const FormLogin = ({ handleClose, type }) => {
           disabled={disabledBtn()}
           sx={{ mt: 4 }}
         >
-          <Spinner isLoading={isLoading} content={`${renderBtnText()}`} />
+          <Spinner
+            isLoading={isLoading || isLoadingLogin}
+            content={`${renderBtnText()}`}
+          />
         </Button>
+        <div style={{ textAlign: "center" }}>
+          <Typography variant="body2" sx={{ mt: 2 }}>
+            {type === "login"
+              ? "Vous n'avez pas de compte ?"
+              : "Vous avez déjà un compte ?"}
+            <Button
+              color="primary"
+              onClick={(e) => {
+                e.preventDefault();
+                handleChangeType();
+              }}
+            >
+              {type === "login" ? "Inscrivez-vous" : "Connectez-vous"}
+            </Button>
+          </Typography>
+        </div>
       </FormControl>
     </form>
   );
