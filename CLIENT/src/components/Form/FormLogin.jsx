@@ -20,6 +20,8 @@ import {
   setPassword as setPasswordFormLogin,
   setType as setTypeFormLogin,
   handleClose as handleCloseFormLogin,
+  selectHelperText,
+  setHelperText as setHelperTextFormLogin,
 } from "../../redux/slices/formLogin.slice";
 
 const FormLogin = () => {
@@ -45,12 +47,8 @@ const FormLogin = () => {
 
   const { openSnackbar } = useSnackbar();
 
-  const [helperText, setHelperText] = React.useState({
-    email: [],
-    password: [],
-    name: [],
-    firstname: [],
-  });
+  const helperText = useSelector(selectHelperText);
+  const setHelperText = (value) => dispatch(setHelperTextFormLogin(value));
 
   const renderBtnText = () => {
     if (type === "login") {
@@ -93,68 +91,114 @@ const FormLogin = () => {
     return password.length > 8 && regex.test(password);
   };
 
-  const checkInput = (type) => {
-    switch (type) {
-      case "email":
-        if (!checkEmail()) {
-          setHelperText({
-            ...helperText,
-            email: ["Email invalide"],
-          });
-        } else {
-          setHelperText({
-            ...helperText,
-            email: [],
-          });
-        }
-        break;
-      case "password":
-        if (!checkPassword()) {
-          setHelperText({
-            ...helperText,
-            password: [
-              "Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule et un chiffre",
-            ],
-          });
-        } else {
-          setHelperText({
-            password: [],
-          });
-        }
-        break;
+  // const checkInput = (type) => {
+  //   switch (type) {
+  //     case "email":
+  //       if (!checkEmail()) {
+  //         setHelperText({
+  //           ...helperText,
+  //           email: ["Email invalide"],
+  //         });
+  //       } else {
+  //         setHelperText({
+  //           ...helperText,
+  //           email: [],
+  //         });
+  //       }
+  //       break;
+  //     case "password":
+  //       if (!checkPassword()) {
+  //         setHelperText({
+  //           ...helperText,
+  //           password: [
+  //             "Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule et un chiffre",
+  //           ],
+  //         });
+  //       } else {
+  //         setHelperText({
+  //           ...helperText,
+  //           password: [],
+  //         });
+  //       }
+  //       break;
+  //     case "name":
+  //       if (!checkName()) {
+  //         setHelperText({
+  //           ...helperText,
+  //           name: [
+  //             "Votre nom doit contenir que des lettres et au moins 3 caractères",
+  //           ],
+  //         });
+  //       } else {
+  //         setHelperText({
+  //           ...helperText,
+  //           name: [],
+  //         });
+  //       }
+  //       break;
+  //     case "firstname":
+  //       if (!checkFirstname()) {
+  //         setHelperText({
+  //           ...helperText,
+  //           firstname: [
+  //             "Votre prénom doit contenir que des lettres et au moins 3 caractères",
+  //           ],
+  //         });
+  //       } else {
+  //         setHelperText({
+  //           ...helperText,
+  //           firstname: [],
+  //         });
+  //       }
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // };
+  const handleValidation = async (field, value) => {
+    let errors = [];
+
+    switch (field) {
       case "name":
-        if (!checkName()) {
-          setHelperText({
-            ...helperText,
-            name: [
-              "Votre nom doit contenir que des lettres et au moins 3 caractères",
-            ],
-          });
-        } else {
-          setHelperText({
-            ...helperText,
-            name: [],
-          });
+        if (!/^[a-zA-Z]+$/.test(value)) {
+          errors.push("Votre nom doit contenir que des lettres.");
+        }
+        if (value.length <= 2) {
+          errors.push("Votre nom doit contenir au moins 3 caractères.");
         }
         break;
       case "firstname":
-        if (!checkFirstname()) {
-          setHelperText({
-            ...helperText,
-            firstname: [
-              "Votre prénom doit contenir que des lettres et au moins 3 caractères",
-            ],
-          });
-        } else {
-          setHelperText({
-            ...helperText,
-            firstname: [],
-          });
+        if (!/^[a-zA-Z]+$/.test(value)) {
+          errors.push("Votre prénom doit contenir que des lettres.");
+        }
+        if (value.length <= 2) {
+          errors.push("Votre prénom doit contenir au moins 3 caractères.");
         }
         break;
+      case "email":
+        if (!/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(value)) {
+          errors.push("Email invalide.");
+        }
+        break;
+      case "password":
+        if (value.length < 8) {
+          errors.push("Mot de passe trop court.");
+        }
+        if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value)) {
+          errors.push(
+            "Le mot de passe doit contenir une majuscule, une minuscule et un chiffre."
+          );
+        }
+        break;
+
       default:
         break;
     }
+
+    setHelperText({
+      ...helperText,
+      [field]: errors,
+    });
   };
 
   const verifyErrors = async (violations) => {
@@ -178,11 +222,14 @@ const FormLogin = () => {
       },
       { email: [], password: [], name: [], firstname: [] }
     );
+    console.log("violationsGrouped", violationsGrouped);
 
-    setHelperText((prevHelperText) => ({
-      ...prevHelperText,
-      ...violationsGrouped,
-    }));
+    setHelperText({
+      email: violationsGrouped?.email,
+      password: violationsGrouped?.password,
+      name: violationsGrouped?.name,
+      firstname: violationsGrouped?.firstname,
+    });
   };
 
   const handleSubmit = async () => {
@@ -217,7 +264,7 @@ const FormLogin = () => {
         }
         if (res?.data?.token) {
           console.log("res", res);
-          openSnackbar("Connexion réussie", "success");
+          openSnackbar("Connexion réussie", "info");
           dispatch(setToken(res.data.token));
           dispatch(setAuthenticated(true));
           handleClose();
@@ -281,11 +328,11 @@ const FormLogin = () => {
               type="text"
               required
               margin="normal"
-              onChange={(e) => {
+              onChange={async (e) => {
                 setName(e.target.value);
-                checkInput("name");
+                await handleValidation("name", e.target.value);
               }}
-              onBlur={() => checkInput("name")}
+              onBlur={() => handleValidation("name", name)}
               error={helperText.name?.length > 0}
               helperText={
                 helperText.name?.length > 0 && helperText.name.join(", ")
@@ -300,9 +347,9 @@ const FormLogin = () => {
               margin="normal"
               onChange={(e) => {
                 setFirstname(e.target.value);
-                checkInput("firstname");
+                handleValidation("firstname", e.target.value);
               }}
-              onBlur={() => checkInput("firstname")}
+              onBlur={() => handleValidation("firstname", firstname)}
               error={helperText.firstname?.length > 0}
               helperText={
                 helperText.firstname?.length > 0 &&
@@ -320,9 +367,9 @@ const FormLogin = () => {
           margin="normal"
           onChange={(e) => {
             setEmail(e.target.value);
-            checkInput("email");
+            handleValidation("email", e.target.value);
           }}
-          onBlur={() => checkInput("email")}
+          onBlur={() => handleValidation("email", email)}
           error={helperText.email?.length > 0}
           helperText={
             helperText.email?.length > 0 && helperText.email.join(", ")
@@ -337,9 +384,9 @@ const FormLogin = () => {
           margin="normal"
           onChange={(e) => {
             setPassword(e.target.value);
-            checkInput("password");
+            handleValidation("password", e.target.value);
           }}
-          onBlur={() => checkInput("password")}
+          onBlur={() => handleValidation("password", password)}
           error={helperText.password?.length > 0}
           helperText={
             helperText.password?.length > 0 && helperText.password.join(", ")

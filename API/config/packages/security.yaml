@@ -1,41 +1,58 @@
 security:
-  # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+  # Hashage des mots de passe
   password_hashers:
     Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: "auto"
-  # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+
+  # Définition du fournisseur d'utilisateur
   providers:
-    # used to reload user from session & other features (e.g. switch_user)
     app_user_provider:
       entity:
         class: App\Entity\User
         property: email
+
+  # Définition des firewalls
   firewalls:
+    dev:
+      # Pour les pages de développement (profiler, WDT, etc.)
+      pattern: ^/(_(profiler|wdt)|css|images|js)/
+      security: false
+
     login:
+      # Pour le login via JSON
       pattern: ^/api/login
       stateless: true
       json_login:
         check_path: /api/login_check
+        username_path: email
         success_handler: lexik_jwt_authentication.handler.authentication_success
         failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
     api:
+      # Accès aux API
       pattern: ^/api
       stateless: true
       jwt: ~
 
+  # Contrôle d'accès
   access_control:
-    # - { path: ^/api/login, roles: PUBLIC_ACCESS }
-    # - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+    - { path: ^/api/login, roles: PUBLIC_ACCESS }
+    - {
+        path: ^/api/product,
+        roles: [IS_AUTHENTICATED_FULLY, ROLE_USER],
+        methods: [PUT, DELETE],
+      }
+    - {
+        path: ^/api/category,
+        roles: [IS_AUTHENTICATED_FULLY, ROLE_USER],
+        methods: [PUT, DELETE],
+      }
 
+# Configuration spécifique pour l'environnement de test (when@test)
 when@test:
   security:
     password_hashers:
-      # By default, password hashers are resource intensive and take time. This is
-      # important to generate secure password hashes. In tests however, secure hashes
-      # are not important, waste resources and increase test times. The following
-      # reduces the work factor to the lowest possible values.
       Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
         algorithm: auto
-        cost: 4 # Lowest possible value for bcrypt
-        time_cost: 3 # Lowest possible value for argon
-        memory_cost: 10 # Lowest possible value for argon
+        cost: 4 # Valeur minimale pour bcrypt
+        time_cost: 3 # Valeur minimale pour argon
+        memory_cost: 10 # Valeur minimale pour argon

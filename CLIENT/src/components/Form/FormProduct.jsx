@@ -61,7 +61,7 @@ const FormProduct = ({ handleClose }) => {
 
       case "price":
         if (value <= 0) errors.push("Le prix doit être supérieur à 0");
-        if (!regexNUMBER.test(value.toString()))
+        if (!regexNUMBER.test(value?.toString()))
           errors.push("Le prix doit être un nombre valide");
         break;
 

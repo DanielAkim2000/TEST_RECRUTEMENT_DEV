@@ -44,6 +44,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column]
+    #[Assert\NotBlank(message: 'Veuillez saisir un mot de passe')]
+    #[Assert\Length(min: 8, minMessage: 'Votre mot de passe doit contenir au moins 6 caractères')]
+    #[Assert\Regex(pattern: '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', message: 'Votre mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule et un chiffre')]
     private ?string $password = null;
 
     public function getId(): ?int

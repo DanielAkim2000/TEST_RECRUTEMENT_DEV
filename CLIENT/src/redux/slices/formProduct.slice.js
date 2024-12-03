@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   formProduct: {
     name: "",
-    price: 0,
+    price: null,
     description: "",
     category: { id: 0, name: "Choisissez une catégorie" },
   },
