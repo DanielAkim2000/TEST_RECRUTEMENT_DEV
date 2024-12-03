@@ -18,7 +18,7 @@ class ProductRepository extends ServiceEntityRepository
     /**
      * @return Product[] Returns an array of Products objects
      */
-    public function findPaginatedProductsBySearch($page, $limit, $search, $priceMin, $priceMax, $category_id): array
+    public function findPaginatedProductsBySearch($page, $limit, $search, $priceMin, $priceMax, $category_id, $triPrice): array
     {
         if ($page < 1) {
             $page = 1;
@@ -29,20 +29,24 @@ class ProductRepository extends ServiceEntityRepository
         if ($priceMin < 0) {
             $priceMin = null;
         }
-        if ($priceMax < $priceMin || $priceMax < 0) {
+        if ($priceMax < $priceMin || $priceMax < 0 || $priceMax === null) {
             $priceMax = null;
         }
         if ($category_id <= 0) {
             $category_id = null;
         }
+        if ($triPrice !== "asc" && $triPrice !== "desc") {
+            $triPrice = "asc";
+        }
 
         $offset = ($page - 1) * $limit;
 
         $qb = $this->createQueryBuilder("p")
-            ->andWhere("LOWER(p.name) LIKE LOWER(:search)")
-            ->setParameter("search", "%" . $search . "%")
             ->setFirstResult($offset)
-            ->setMaxResults($limit);
+            ->setMaxResults($limit)
+            ->orderBy("p.price", $triPrice)
+            ->andWhere("LOWER(p.name) LIKE LOWER(:search)")
+            ->setParameter("search", "%" . $search . "%");
 
         if ($category_id !== null) {
             $qb->andWhere("p.category = :category_id")
@@ -95,6 +99,18 @@ class ProductRepository extends ServiceEntityRepository
             $qb->andWhere("p.price <= :priceMax")
                 ->setParameter("priceMax", $priceMax);
         }
+
+        return $qb->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * return float Returns the average price of all products
+     */
+    public function getMaxPrice(): float
+    {
+        $qb = $this->createQueryBuilder("p")
+            ->select("MAX(p.price)");
 
         return $qb->getQuery()
             ->getSingleScalarResult();

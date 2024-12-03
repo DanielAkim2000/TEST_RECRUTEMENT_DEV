@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import ButtonDelete from "../Button/ButtonDelete";
 import ButtonModify from "../Button/ButtonModify";
 import {
@@ -11,10 +11,23 @@ import {
   Paper,
   Typography,
   CircularProgress,
+  Checkbox,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+  Slide,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useDispatch, useSelector } from "react-redux";
 import { setFormProduct } from "../../redux/slices/formProduct.slice";
-import { useSearchProductsQuery } from "../../api/slices/product.slice";
+import {
+  useDeleteProductsMutation,
+  useSearchProductsQuery,
+} from "../../api/slices/product.slice";
 import {
   selectCategory,
   selectLimit,
@@ -22,31 +35,37 @@ import {
   selectPriceMax,
   selectPriceMin,
   selectSearch,
+  selectTriPrice,
 } from "../../redux/slices/searchData.slice";
+import Spinner from "../Spinner";
+import useSnackBar from "../../hooks/useSnackBar";
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 const TableProducts = () => {
   const page = useSelector(selectPage) || 1;
   const limit = useSelector(selectLimit) || 5;
   const search = useSelector(selectSearch) || "";
-  const priceMax = useSelector(selectPriceMax) || 10000;
+  const priceMax = useSelector(selectPriceMax);
   const priceMin = useSelector(selectPriceMin) || 0;
   const category = useSelector(selectCategory);
+  const triPrice = useSelector(selectTriPrice);
 
   const safeSearch = typeof search === "string" ? search : "";
   const safeLimit = typeof limit === "number" ? limit : 5;
   const safePage = typeof page === "number" ? page : 1;
   const safePrice = {
     min: typeof priceMin === "number" ? priceMin : 0,
-    max: typeof priceMax === "number" ? priceMax : 10000,
+    max: typeof priceMax === "number" ? priceMax : null,
   };
   const safeCategory =
     typeof category === "object" ? category : { id: 0, name: "" };
-
+  const safeTriPrice = typeof triPrice === "string" ? triPrice : "asc";
   const {
     data: filteredData,
     error,
-    isLoading,
-    isSuccess,
     isFetching,
     refetch,
   } = useSearchProductsQuery({
@@ -56,20 +75,58 @@ const TableProducts = () => {
     priceMin: safePrice.min,
     priceMax: safePrice.max,
     category: safeCategory,
+    triPrice: safeTriPrice,
   });
+  const [deleteProducts, { isLoading }] = useDeleteProductsMutation();
+  const { openSnackbar } = useSnackBar();
   const dispatch = useDispatch();
+  const [productsSelected, setProductsSelected] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
 
-  // useEffect(() => {
-  //   if (isSuccess) {
-  //     dispatch(setProducts(products));
-  //   }
-  // }, [isSuccess, products, dispatch]);
+  const handleChanged = (event) => {
+    const { value, checked } = event.target;
+    console.log("value", value);
+    console.log("checked", checked);
+    if (value === "all") {
+      if (checked) {
+        setProductsSelected(filteredData.products.map((product) => product.id));
+      } else {
+        setProductsSelected([]);
+      }
+    } else {
+      if (checked) {
+        setProductsSelected([...productsSelected, parseInt(value)]);
+      } else {
+        setProductsSelected(
+          productsSelected.filter((id) => id !== parseInt(value))
+        );
+      }
+    }
+  };
 
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+  };
+
+  const handleClose = () => {
+    setOpenDialog(false);
+  };
+
+  const handleDelete = async () => {
+    const res = await deleteProducts(productsSelected);
+    setOpenDialog(false);
+    openSnackbar(res.data.message);
+    setProductsSelected([]);
+  };
+
+  console.log("productsSelected", productsSelected);
+
+  // me permet de recharger les données à chaque fois que je change de page, de limite, de prix ou de catégorie
   useEffect(() => {
     refetch();
-  }, [search, page, limit, refetch, priceMin, priceMax, category]);
-
-  console.log("isLoading", isLoading);
+    // permet de déselectionner les produits sélectionnés si on change de page
+    setProductsSelected([]);
+  }, [search, page, limit, refetch, priceMin, priceMax, category, triPrice]);
 
   if (error) {
     return (
@@ -95,6 +152,46 @@ const TableProducts = () => {
       <Table>
         <TableHead>
           <TableRow sx={{ backgroundColor: "orange.main" }}>
+            <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+              {productsSelected.length !== 0 && (
+                <>
+                  <IconButton onClick={handleOpenDialog}>
+                    <DeleteIcon />
+                  </IconButton>
+                  <Dialog
+                    open={openDialog}
+                    TransitionComponent={Transition}
+                    keepMounted
+                    onClose={handleClose}
+                    aria-describedby="alert-dialog-slide-description"
+                  >
+                    <DialogTitle>
+                      Voulez vous vraiment supprimer tous les produits
+                      sélectionnés ?
+                    </DialogTitle>
+                    <DialogContent>
+                      <DialogContentText id="alert-dialog-slide-description">
+                        La suppression de ces produits est irréversible.
+                      </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={handleClose}>Annuler</Button>
+                      <Button onClick={handleDelete} className="!text-red-500">
+                        <Spinner isLoading={isLoading} content={"Supprimer"} />
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
+                </>
+              )}
+              <Checkbox
+                value={"all"}
+                onChange={handleChanged}
+                checked={
+                  productsSelected.length === filteredData?.products.length &&
+                  filteredData?.products.length !== 0
+                }
+              />
+            </TableCell>
             <TableCell sx={{ color: "white", fontWeight: "bold" }}>#</TableCell>
             <TableCell sx={{ color: "white", fontWeight: "bold" }}>
               Nom
@@ -136,6 +233,13 @@ const TableProducts = () => {
                   },
                 }}
               >
+                <TableCell>
+                  <Checkbox
+                    value={product.id}
+                    onChange={handleChanged}
+                    checked={productsSelected.includes(product.id)}
+                  />
+                </TableCell>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{product.name}</TableCell>
                 <TableCell>{`${product.price} €`}</TableCell>

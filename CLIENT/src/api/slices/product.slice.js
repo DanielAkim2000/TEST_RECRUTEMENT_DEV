@@ -9,10 +9,22 @@ const productSlice = api.injectEndpoints({
     getProduct: builder.query({
       query: (id) => `/api/product/${id}`,
     }),
+    getPrixMax: builder.query({
+      query: () => "/api/products/prixMax",
+      providesTags: ["PrixMax"],
+    }),
     searchProducts: builder.query({
-      query: ({ search, page, limit, priceMin, priceMax, category }) =>
-        `/api/products/search?search=${search}&page=${page}&limit=${limit}&priceMin=${priceMin}&priceMax=${priceMax}&category=${category.id}`,
-      providesTags: ["ProductsFilteredList"],
+      query: ({
+        search,
+        page,
+        limit,
+        priceMin,
+        priceMax,
+        category,
+        triPrice,
+      }) =>
+        `/api/products/search?search=${search}&page=${page}&limit=${limit}&priceMin=${priceMin}&priceMax=${priceMax}&category=${category.id}&triPrice=${triPrice}`,
+      providesTags: ["ProductsFilteredList", "PrixMax"],
     }),
     createProduct: builder.mutation({
       query: (product) => ({
@@ -20,7 +32,7 @@ const productSlice = api.injectEndpoints({
         method: "POST",
         body: product,
       }),
-      invalidatesTags: ["Products"],
+      invalidatesTags: ["Products", "ProductsFilteredList", "PrixMax"],
     }),
     updateProduct: builder.mutation({
       query: (product) => ({
@@ -28,14 +40,22 @@ const productSlice = api.injectEndpoints({
         method: "PUT",
         body: product,
       }),
-      invalidatesTags: ["Products"],
+      invalidatesTags: ["Products", "ProductsFilteredList", "PrixMax"],
     }),
     deleteProduct: builder.mutation({
       query: (id) => ({
         url: `/api/product/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Products"],
+      invalidatesTags: ["Products", "ProductsFilteredList", "PrixMax"],
+    }),
+    deleteProducts: builder.mutation({
+      query: (ids) => ({
+        url: `/api/products`,
+        method: "DELETE",
+        body: ids,
+      }),
+      invalidatesTags: ["Products", "ProductsFilteredList", "PrixMax"],
     }),
   }),
 });
@@ -47,4 +67,6 @@ export const {
   useUpdateProductMutation,
   useDeleteProductMutation,
   useSearchProductsQuery,
+  useDeleteProductsMutation,
+  useGetPrixMaxQuery,
 } = productSlice;

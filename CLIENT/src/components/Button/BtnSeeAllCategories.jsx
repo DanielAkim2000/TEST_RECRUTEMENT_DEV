@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import BtnEffectInverseHover from "./BtnEffectInverseHover";
 import {
   Box,
@@ -58,17 +58,18 @@ const RenderRow = (props) => {
     if (formCategory.name !== "") {
       return;
     }
-    setEdit(true);
     dispatch(setFormCategory(data[index]));
+    setEdit(true);
   };
 
   const handleSubmit = async () => {
     const res = await updateCategory(formCategory);
-    if (res?.data?.status === "Categorie mise à jour") {
-      openSnackbar("Catégorie modifiée avec succès");
+    if (res?.data?.message) {
+      openSnackbar(res.data.message, "success");
     } else {
       openSnackbar(
-        "Erreur lors de la modification de la catégorie , vérifiez que vous avez bien saisie le nom de la catégorie"
+        "Erreur lors de la modification de la catégorie, veuillez réessayer plus tard",
+        "error"
       );
     }
     setEdit(false);
@@ -79,8 +80,6 @@ const RenderRow = (props) => {
     const timer = setTimeout(() => {
       dispatch(resetFormCategory());
     }, 500);
-
-    return () => clearTimeout(timer);
   };
 
   const handleClose = () => {
@@ -93,21 +92,17 @@ const RenderRow = (props) => {
 
   const handleDelete = async () => {
     const res = await deleteCategory(data[index]?.id);
-    if (res?.data?.status === "Categorie supprimée") {
-      openSnackbar("Catégorie supprimée avec succès");
+    if (res?.data?.message) {
+      openSnackbar(res.data.message, "success");
       handleClose();
     } else {
-      openSnackbar("Erreur lors de la suppression de la catégorie");
+      openSnackbar(
+        "Erreur lors de la suppression de la catégorie, veuillez réessayer plus tard",
+        "error"
+      );
       handleClose();
     }
   };
-
-  useEffect(() => {
-    // au cas ou il y aun scroll le formulaire de modification reste visible
-    if (formCategory?.id === data[index]?.id && formCategory?.name !== "") {
-      setEdit(true);
-    }
-  }, [formCategory, data, index]);
 
   return (
     <div className="flex justify-between w-full border-b py-1">
@@ -133,11 +128,11 @@ const RenderRow = (props) => {
               },
             }}
             error={
-              formCategory?.name?.length <= 3 ||
+              formCategory?.name?.length < 3 ||
               formCategory?.name?.length >= 255
             }
             helperText={
-              formCategory?.name?.length <= 3 ||
+              formCategory?.name?.length < 3 ||
               formCategory?.name?.length >= 255
                 ? "Le nom doit contenir entre 3 et 255 caractères"
                 : ""

@@ -75,7 +75,7 @@ class CategoryController extends AbstractController
             $errors = $this->validator->validate($category);
 
             if (count($errors) > 0) {
-                return $this->json($errors, 400);
+                return $this->json(['message' => $errors[0]->getMessage()], 400);
             }
             $this->entityManager->persist($category);
             $this->entityManager->flush();
@@ -95,7 +95,7 @@ class CategoryController extends AbstractController
             $category = $this->entityManager->getRepository(Category::class)->find($id);
 
             if (!$category) {
-                return $this->json(['message' => self::MESSAGE_CATEGORY_NOT_FOUND], 404);
+                return $this->json(['message' => "Cette catégorie n'existe pas ou a été supprimée"], 200);
             }
 
             $category->setName($content['name']);
@@ -103,7 +103,7 @@ class CategoryController extends AbstractController
             $this->entityManager->persist($category);
             $this->entityManager->flush();
 
-            return $this->json(['status' => 'Categorie mise à jour'], 200);
+            return $this->json(['message' => 'La catégorie a été modifiée avec succès'], 200);
         } catch (\Exception $e) {
             return $this->json(['message' => self::MESSAGE_CATEGORY_ERROR], 500);
         }
@@ -116,13 +116,17 @@ class CategoryController extends AbstractController
             $category = $this->entityManager->getRepository(Category::class)->find($id);
 
             if (!$category) {
-                return $this->json(['message' => self::MESSAGE_CATEGORY_NOT_FOUND], 404);
+                return $this->json(['message' => "Cette catégorie n'existe pas ou a été supprimée"], 200);
+            }
+
+            if ($category->getProducts()->count() > 0) {
+                return $this->json(['message' => 'Cette catégorie est utilisée par un ou plusieurs produits , vous ne pouvez pas la supprimer'], 200);
             }
 
             $this->entityManager->remove($category);
             $this->entityManager->flush();
 
-            return $this->json(['status' => 'Categorie supprimée'], 200);
+            return $this->json(['message' => 'La catégorie a été supprimée avec succès'], 200);
         } catch (\Exception $e) {
             return $this->json(['message' => self::MESSAGE_CATEGORY_ERROR], 500);
         }

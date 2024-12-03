@@ -24,7 +24,6 @@ const FormCategory = (props) => {
   useEffect(() => {
     if (isSuccess) {
       props.handleClose();
-      openSnackbar("Catégorie sauvegardée avec succès", "success");
     }
   }, [isSuccess, props, openSnackbar]);
 
@@ -53,7 +52,16 @@ const FormCategory = (props) => {
             "Veuillez vérifier que le nom de la catégorie contient entre 3 et 255 caractères."
           );
         }
-        await createCategory(category);
+        const trimCategory = { name: name.trim() };
+        const res = await createCategory(trimCategory);
+        if (res?.data?.message) {
+          openSnackbar(res.data.message, "success");
+        } else {
+          openSnackbar(
+            "Erreur lors de la création de la catégorie, veuillez réessayer plus tard",
+            "error"
+          );
+        }
       }}
     >
       <TextField

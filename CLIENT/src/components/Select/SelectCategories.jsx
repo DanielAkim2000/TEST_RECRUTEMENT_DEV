@@ -1,14 +1,26 @@
 import React from "react";
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import {
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select,
+} from "@mui/material";
 import { useGetCategoriesQuery } from "../../api/slices/category.slice";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectCategory,
   setCategory as setFormProductCategory,
 } from "../../redux/slices/formProduct.slice";
+import {
+  useCreateProductMutation,
+  useUpdateProductMutation,
+} from "../../api/slices/product.slice";
 
 const SelectCategories = () => {
   const { data: categories } = useGetCategoriesQuery();
+  const [fecthCreate, { isError: isErrorUpdate }] = useUpdateProductMutation();
+  const [fecthUpdate, { isError: isErrorCreate }] = useCreateProductMutation();
   const [touched, setTouched] = React.useState(false);
 
   const category = useSelector(selectCategory);
@@ -27,8 +39,6 @@ const SelectCategories = () => {
     dispatch(setFormProductCategory(category));
   };
 
-  console.log("category", category);
-
   const testCategory = (category) => {
     if (categories.find((cat) => cat.id === category?.id)) {
       return true;
@@ -37,24 +47,23 @@ const SelectCategories = () => {
   };
 
   const checkCategory = () => {
-    if (!testCategory(category) && touched) {
+    if (
+      (!testCategory(category) && touched) ||
+      (!testCategory(category) && (isErrorCreate || isErrorUpdate))
+    ) {
       return true;
     }
     return false;
   };
 
   return (
-    <FormControl fullWidth>
-      <InputLabel id="demo-simple-select-label" error={checkCategory()}>
-        Catégorie
-      </InputLabel>
+    <FormControl fullWidth error={checkCategory()}>
+      <InputLabel id="demo-simple-select-label">Catégorie</InputLabel>
       <Select
         labelId="demo-simple-select-label"
         id="demo-simple-select"
         value={category?.id || 0}
         label="Catégorie"
-        error={checkCategory()}
-        helperText={checkCategory() ? "Veuillez choisir une catégorie" : ""}
         onChange={handleChange}
         onFocus={() => setTouched(true)}
       >
@@ -65,6 +74,9 @@ const SelectCategories = () => {
           </MenuItem>
         ))}
       </Select>
+      <FormHelperText error>
+        {checkCategory() ? "Veuillez choisir une catégorie" : ""}
+      </FormHelperText>
     </FormControl>
   );
 };

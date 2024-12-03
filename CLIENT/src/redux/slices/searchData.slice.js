@@ -8,8 +8,9 @@ const initialState = {
     id: 0,
     name: "",
   },
-  priceMax: 10000,
+  priceMax: null,
   priceMin: 0,
+  triPrice: "asc",
 };
 
 const searchDataSlice = createSlice({
@@ -34,6 +35,9 @@ const searchDataSlice = createSlice({
     setPriceMin: (state, action) => {
       state.priceMin = action.payload;
     },
+    setTriPrice: (state, action) => {
+      state.triPrice = action.payload;
+    },
   },
 });
 
@@ -44,6 +48,7 @@ export const {
   setCategory,
   setPriceMax,
   setPriceMin,
+  setTriPrice,
 } = searchDataSlice.actions;
 
 // selectors
@@ -53,5 +58,6 @@ export const selectSearch = (state) => state.searchData.search;
 export const selectCategory = (state) => state.searchData.category;
 export const selectPriceMax = (state) => state.searchData.priceMax;
 export const selectPriceMin = (state) => state.searchData.priceMin;
+export const selectTriPrice = (state) => state.searchData.triPrice;
 
 export default searchDataSlice.reducer;

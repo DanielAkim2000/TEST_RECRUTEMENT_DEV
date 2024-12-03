@@ -93,14 +93,26 @@ class ProductController extends AbstractController
             $errors = $this->validator->validate($product);
             // si il y a des erreurs on les retourne
             if (count($errors) > 0) {
-                return $this->json($errors, 400);
+                if ($errors[0]->getPropertyPath() === 'name') {
+                    return $this->json(['message' => 'Vérifiez le nom du produit'], 200);
+                }
+                if ($errors[0]->getPropertyPath() === 'price') {
+                    return $this->json(['message' => 'Vérifiez le prix du produit'], 200);
+                }
+                if ($errors[0]->getPropertyPath() === 'description') {
+                    return $this->json(['message' => 'Vérifiez la description du produit'], 200);
+                }
+                if ($errors[0]->getPropertyPath() === 'category') {
+                    return $this->json(['message' => 'Vérifiez la catégorie du produit'], 200);
+                }
+                return $this->json(['message' => $errors[0]->getPropertyPath()], 200);
             }
 
             // on persiste et on flush
             $this->entityManager->persist($product);
             $this->entityManager->flush();
 
-            return $this->json($product, 201, [], ['groups' => self::GROUP_PRODUCT_READ]);
+            return $this->json(['message' => 'Produit ajouté avec succès'], 201);
         } catch (\Exception $e) {
             return $this->json(['message' => $e->getMessage()], 500);
         }
@@ -113,8 +125,8 @@ class ProductController extends AbstractController
             $product = $this->entityManager->getRepository(Product::class)->find($id);
             if (!$product) {
                 return $this->json([
-                    'message' => self::MESSAGE_PRODUCT_NOT_FOUND
-                ], 404);
+                    'message' => "Ce produit n'existe pas ou a été supprimé"
+                ], 200);
             }
             $content = $request->getContent();
             $data =  json_decode($content, true);
@@ -123,8 +135,8 @@ class ProductController extends AbstractController
             $product->setDescription($data['description']);
             $product->setPrice($data['price']);
 
-            if (isset($data['category_id'])) {
-                $category = $this->entityManager->getRepository(Category::class)->find($data['category_id']);
+            if (isset($data['category']['id'])) {
+                $category = $this->entityManager->getRepository(Category::class)->find($data['category']['id']);
                 if ($category) {
                     $product->setCategory($category);
                 }
@@ -132,13 +144,24 @@ class ProductController extends AbstractController
 
             $errors = $this->validator->validate($product);
             if (count($errors) > 0) {
-                return $this->json($errors, 400);
+                if ($errors[0]->getPropertyPath() === 'name') {
+                    return $this->json(['message' => 'Vérifiez le nom du produit'], 200);
+                }
+                if ($errors[0]->getPropertyPath() === 'price') {
+                    return $this->json(['message' => 'Vérifiez le prix du produit'], 200);
+                }
+                if ($errors[0]->getPropertyPath() === 'description') {
+                    return $this->json(['message' => 'Vérifiez la description du produit'], 200);
+                }
+                if ($errors[0]->getPropertyPath() === 'category') {
+                    return $this->json(['message' => 'Vérifiez la catégorie du produit'], 200);
+                }
             }
 
             $this->entityManager->persist($product);
             $this->entityManager->flush();
 
-            return $this->json($product, 200, [], ['groups' => self::GROUP_PRODUCT_READ]);
+            return $this->json(["message" => "Produit modifié avec succès"], 200);
         } catch (\Exception $e) {
             return $this->json(['message' => $e->getMessage()], 500);
         }
@@ -167,17 +190,18 @@ class ProductController extends AbstractController
     }
 
     #[Route('/products/search', name: 'get_products_by_category', methods: ['GET'])]
-    public function get_products_by_category(Request $request): JsonResponse
+    public function get_products_by_search(Request $request): JsonResponse
     {
         try {
             $search = trim($request->query->get('search', ''));
             $page = $request->query->getInt('page') ?? 1;
             $limit = $request->query->getInt('limit') ?? 10;
             $priceMin = $request->query->get('priceMin') ? (float)$request->query->get('priceMin') : null;
-            $priceMax = $request->query->get('priceMax') ? (float)$request->query->get('priceMax') : null;
+            $priceMax = $request->query->get('priceMax') !== "null" ? (float)$request->query->get('priceMax') : null;
             $category_id = $request->query->getInt('category') ?? 0;
+            $triPrice = $request->query->get('triPrice') ?? 'ASC';
 
-            $products = $this->entityManager->getRepository(Product::class)->findPaginatedProductsBySearch($page, $limit, $search, $priceMin, $priceMax, $category_id);
+            $products = $this->entityManager->getRepository(Product::class)->findPaginatedProductsBySearch($page, $limit, $search, $priceMin, $priceMax, $category_id, $triPrice);
             $totalItems = $this->entityManager->getRepository(Product::class)->countProductsBySearch($search, $priceMin, $priceMax, $category_id);
             $totalPages = ceil($totalItems / $limit);
             return $this->json([
@@ -186,6 +210,34 @@ class ProductController extends AbstractController
                 "totalItems" => $totalItems,
                 "totalPages" => $totalPages,
             ], 200, [], ['groups' => self::GROUP_PRODUCT_READ]);
+        } catch (\Exception $e) {
+            return $this->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    #[Route('/products', name: 'delete_all_products_selected', methods: ['DELETE'])]
+    public function delete_all_products_selected(Request $request): JsonResponse
+    {
+        try {
+            $content = $request->getContent();
+            $data = json_decode($content, true);
+            $products = $this->entityManager->getRepository(Product::class)->findBy(['id' => $data]);
+            foreach ($products as $product) {
+                $this->entityManager->remove($product);
+            }
+            $this->entityManager->flush();
+            return $this->json(['message' => 'Les produits ont été supprimés'], 200);
+        } catch (\Exception $e) {
+            return $this->json(['message' => "Une erreur est survenue lors de la suppression des produits"], 500);
+        }
+    }
+
+    #[Route("/products/prixMax", name: 'get_max_price', methods: ['GET'])]
+    public function get_max_price(): JsonResponse
+    {
+        try {
+            $maxPrice = $this->entityManager->getRepository(Product::class)->getMaxPrice();
+            return $this->json(['maxPrice' => $maxPrice], 200);
         } catch (\Exception $e) {
             return $this->json(['message' => $e->getMessage()], 500);
         }

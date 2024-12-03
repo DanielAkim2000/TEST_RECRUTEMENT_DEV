@@ -1,4 +1,3 @@
-import React from "react";
 import { Typography } from "@mui/material";
 import TableProducts from "../components/TableProduct";
 import ButtonAdProduct from "../components/Button/ButtonAdProduct";
@@ -6,8 +5,9 @@ import ButtonAdCategory from "../components/Button/ButtonAdCategory";
 import BtnSeeAllCategories from "../components/Button/BtnSeeAllCategories";
 import SelectLimitForTable from "../components/Select/SelectLimitForTable";
 import PaginatorTableProduct from "../components/Paginator/PaginatorTableProduct";
-import InputPriceFilter from "../components/Input/InputPriceFilter";
+import SlicerPriceMinMax from "../components/Slicer/SlicerPriceMinMax";
 import SelectCategoryForFilter from "../components/Select/SelectCategoryForFilter";
+import RadioGroupTriPrice from "../components/RadioGroup/RadioGroupTriPrice";
 
 const Home = () => {
   return (
@@ -23,15 +23,21 @@ const Home = () => {
           <Typography variant="h5">Liste des produits</Typography>
         </div>
         <div className="mt-3 sm:mt-0 flex-grow">
-          <Typography variant="h6" marginBottom={1}>
-            Filter par:
-          </Typography>
           <div className="flex gap-4 flex-grow flex-col sm:flex-row justify-end">
+            <RadioGroupTriPrice />
+            <Typography
+              variant="h6"
+              sx={{
+                marginRight: "auto",
+              }}
+            >
+              Filter par:
+            </Typography>
             <SelectCategoryForFilter />
             <SelectLimitForTable />
           </div>
           <div className="mt-2">
-            <InputPriceFilter />
+            <SlicerPriceMinMax />
           </div>
         </div>
       </div>

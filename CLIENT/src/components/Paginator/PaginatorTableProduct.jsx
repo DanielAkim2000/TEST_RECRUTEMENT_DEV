@@ -9,6 +9,7 @@ import {
   selectPriceMax,
   selectPriceMin,
   selectSearch,
+  selectTriPrice,
   setPage,
 } from "../../redux/slices/searchData.slice";
 
@@ -19,6 +20,7 @@ const PaginatorTableProduct = () => {
   const category = useSelector(selectCategory);
   const priceMin = useSelector(selectPriceMin);
   const priceMax = useSelector(selectPriceMax);
+  const triPrice = useSelector(selectTriPrice);
 
   const dispatch = useDispatch();
 
@@ -29,6 +31,7 @@ const PaginatorTableProduct = () => {
     priceMin: priceMin,
     priceMax: priceMax,
     category: category,
+    triPrice: triPrice,
   });
 
   const handleChange = (event, value) => {

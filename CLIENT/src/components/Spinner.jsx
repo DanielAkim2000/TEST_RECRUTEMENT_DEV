@@ -20,7 +20,8 @@ const Spinner = ({ isLoading, content }) => {
 
 Spinner.propTypes = {
   isLoading: PropTypes.bool.isRequired,
-  content: PropTypes.element.isRequired,
+  content: PropTypes.oneOfType([PropTypes.string, PropTypes.element])
+    .isRequired,
 };
 
 export default Spinner;

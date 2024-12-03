@@ -36,7 +36,6 @@ const FormProduct = (props) => {
   useEffect(() => {
     if (isSuccess || isSuccessAdd) {
       props.handleClose();
-      openSnackbar("success", "Produit sauvegardé avec succès");
     }
   }, [isSuccess, isSuccessAdd, props, openSnackbar]);
 
@@ -56,7 +55,10 @@ const FormProduct = (props) => {
   const hasError = (field) => touched[field] && checkError(field);
 
   const isSubmitDisabled = () =>
-    checkError("name") || checkError("price") || checkError("description");
+    checkError("name") ||
+    checkError("price") ||
+    checkError("description") ||
+    product.category?.id === 0;
 
   return (
     <Box
@@ -75,10 +77,25 @@ const FormProduct = (props) => {
             "error"
           );
         }
+        const trimProduct = {
+          id,
+          name: name.trim(),
+          price,
+          description: description.trim(),
+          category: product.category,
+        };
         if (id) {
-          await updateProduct(product);
+          const res = await updateProduct(trimProduct);
+          if (res?.data?.message) {
+            openSnackbar(res.data.message, "success");
+          } else {
+            openSnackbar(
+              "Erreur lors de la modification du produit, veuillez réessayer plus tard",
+              "error"
+            );
+          }
         } else {
-          await createProduct(product);
+          await createProduct(trimProduct);
         }
       }}
     >
