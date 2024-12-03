@@ -24,19 +24,27 @@ const Home = () => {
         </div>
         <div className="mt-3 sm:mt-0 flex-grow">
           <div className="flex gap-4 flex-grow flex-col sm:flex-row justify-end">
-            <RadioGroupTriPrice />
-            <Typography
-              variant="h6"
-              sx={{
-                marginRight: "auto",
-              }}
-            >
-              Filter par:
-            </Typography>
-            <SelectCategoryForFilter />
-            <SelectLimitForTable />
+            <div className="w-full sm:w-1/3">
+              <Typography
+                variant="h6"
+                sx={{
+                  marginRight: "auto",
+                }}
+              >
+                Filter par:
+              </Typography>
+            </div>
+            <div className="w-full sm:w-1/3">
+              <SelectCategoryForFilter />
+            </div>
+            <div className="w-full sm:w-1/3">
+              <SelectLimitForTable />
+            </div>
           </div>
           <div className="mt-2">
+            <RadioGroupTriPrice />
+          </div>
+          <div className="mt-2 w-full sm:w-full sm:ml-auto">
             <SlicerPriceMinMax />
           </div>
         </div>

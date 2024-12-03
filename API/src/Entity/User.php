@@ -6,6 +6,7 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -20,18 +21,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180)]
     #[Assert\Email(message: 'Veuillez saisir une adresse email valide')]
     #[Assert\NotBlank(message: 'Veuillez saisir une adresse email')]
+    #[Groups(['user:read'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank(message: 'Veuillez saisir votre nom')]
     #[Assert\Length(min: 3, max: 50, minMessage: 'Votre nom doit contenir au moins 3 caractères', maxMessage: 'Votre nom doit contenir au maximum 50 caractères')]
     #[Assert\Regex(pattern: '/^[a-zA-Z0-9_]+$/', message: 'Votre nom ne doit contenir que des lettres, des chiffres et des tirets')]
+    #[Groups(['user:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank(message: 'Veuillez saisir votre prénom')]
     #[Assert\Length(min: 3, max: 50, minMessage: 'Votre prénom doit contenir au moins 3 caractères', maxMessage: 'Votre prénom doit contenir au maximum 50 caractères')]
     #[Assert\Regex(pattern: '/^[a-zA-Z0-9_]+$/', message: 'Votre prénom ne doit contenir que des lettres, des chiffres et des tirets')]
+    #[Groups(['user:read'])]
     private ?string $prenom = null;
 
     /**

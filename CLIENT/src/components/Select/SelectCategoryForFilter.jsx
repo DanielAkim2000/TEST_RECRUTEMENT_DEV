@@ -26,7 +26,7 @@ const SelectCategoryForFilter = () => {
   };
 
   return (
-    <FormControl>
+    <FormControl fullWidth>
       <InputLabel id="demo-simple-select-label">Catégorie</InputLabel>
       <Select
         labelId="demo-simple-select-label"

@@ -1,9 +1,9 @@
 import { Button, FormControl, TextField, Typography } from "@mui/material";
-import React from "react";
 import Spinner from "../Spinner";
 import {
   useLoginMutation,
   useRegisterMutation,
+  useUpdateMutation,
 } from "../../api/slices/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import useSnackbar from "../../hooks/useSnackbar";
@@ -22,27 +22,29 @@ import {
   handleClose as handleCloseFormLogin,
   selectHelperText,
   setHelperText as setHelperTextFormLogin,
+  selectNewPassword,
+  setNewPassword as setNewPasswordFormLogin,
 } from "../../redux/slices/formLogin.slice";
+import PropTypes from "prop-types";
 
-const FormLogin = () => {
-  const [register, { isLoading, isError }] = useRegisterMutation();
+const FormLogin = ({ handleCloseInfo = null }) => {
+  const [register, { isLoading }] = useRegisterMutation();
   const [login, { isLoading: isLoadingLogin }] = useLoginMutation();
+  const [update, { isLoading: isLoadingUpdate }] = useUpdateMutation();
   const dispatch = useDispatch();
-  // const [email, setEmail] = React.useState("");
   const email = useSelector(selectEmail);
-  // const [password, setPassword] = React.useState("");
   const password = useSelector(selectPassword);
-  // const [name, setName] = React.useState("");
   const name = useSelector(selectName);
-  // const [firstname, setFirstname] = React.useState("");
   const firstname = useSelector(selectFirstName);
   const type = useSelector(selectType);
   const setType = (value) => dispatch(setTypeFormLogin(value));
+  const newPassword = useSelector(selectNewPassword);
 
   const setName = (value) => dispatch(setNameFormLogin(value));
   const setFirstname = (value) => dispatch(setFirstNameFormLogin(value));
   const setEmail = (value) => dispatch(setEmailFormLogin(value));
   const setPassword = (value) => dispatch(setPasswordFormLogin(value));
+  const setNewPassword = (value) => dispatch(setNewPasswordFormLogin(value));
   const handleClose = () => dispatch(handleCloseFormLogin());
 
   const { openSnackbar } = useSnackbar();
@@ -54,6 +56,9 @@ const FormLogin = () => {
     if (type === "login") {
       return "Connexion";
     }
+    if (type === "info") {
+      return "Mettre à jour";
+    }
     return "Créer un compte";
   };
   const disabledBtn = () => {
@@ -63,6 +68,14 @@ const FormLogin = () => {
       case "register":
         return (
           !checkEmail() || !checkPassword() || !checkName() || !checkFirstname()
+        );
+      case "info":
+        return (
+          !checkEmail() ||
+          !checkPassword() ||
+          !checkName() ||
+          !checkFirstname() ||
+          !checkNewPassword()
         );
       default:
         return true;
@@ -76,12 +89,13 @@ const FormLogin = () => {
 
   const checkName = () => {
     //verifier si le nom contient des chiffres
-    const regex = /^[a-zA-Z]+$/;
+    const regex = /^[a-zA-Z]+(\s+[a-zA-Z]+)*$/;
     return regex.test(name) && name.length > 2;
   };
 
   const checkFirstname = () => {
-    const regex = /^[a-zA-Z]+$/;
+    // authoriser les espace au milieu
+    const regex = /^[a-zA-Z]+(\s+[a-zA-Z]+)*$/;
     return regex.test(firstname) && firstname.length > 2;
   };
 
@@ -91,70 +105,16 @@ const FormLogin = () => {
     return password.length > 8 && regex.test(password);
   };
 
-  // const checkInput = (type) => {
-  //   switch (type) {
-  //     case "email":
-  //       if (!checkEmail()) {
-  //         setHelperText({
-  //           ...helperText,
-  //           email: ["Email invalide"],
-  //         });
-  //       } else {
-  //         setHelperText({
-  //           ...helperText,
-  //           email: [],
-  //         });
-  //       }
-  //       break;
-  //     case "password":
-  //       if (!checkPassword()) {
-  //         setHelperText({
-  //           ...helperText,
-  //           password: [
-  //             "Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule et un chiffre",
-  //           ],
-  //         });
-  //       } else {
-  //         setHelperText({
-  //           ...helperText,
-  //           password: [],
-  //         });
-  //       }
-  //       break;
-  //     case "name":
-  //       if (!checkName()) {
-  //         setHelperText({
-  //           ...helperText,
-  //           name: [
-  //             "Votre nom doit contenir que des lettres et au moins 3 caractères",
-  //           ],
-  //         });
-  //       } else {
-  //         setHelperText({
-  //           ...helperText,
-  //           name: [],
-  //         });
-  //       }
-  //       break;
-  //     case "firstname":
-  //       if (!checkFirstname()) {
-  //         setHelperText({
-  //           ...helperText,
-  //           firstname: [
-  //             "Votre prénom doit contenir que des lettres et au moins 3 caractères",
-  //           ],
-  //         });
-  //       } else {
-  //         setHelperText({
-  //           ...helperText,
-  //           firstname: [],
-  //         });
-  //       }
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // };
+  const checkNewPassword = () => {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    return (
+      (newPassword.length > 8 &&
+        regex.test(newPassword) &&
+        newPassword !== password) ||
+      newPassword === ""
+    );
+  };
+
   const handleValidation = async (field, value) => {
     let errors = [];
 
@@ -190,7 +150,21 @@ const FormLogin = () => {
           );
         }
         break;
-
+      case "newPassword":
+        if (value.length < 8 && value.length > 0) {
+          errors.push("Mot de passe trop court.");
+        }
+        if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value) && value.length > 0) {
+          errors.push(
+            "Le mot de passe doit contenir une majuscule, une minuscule et un chiffre."
+          );
+        }
+        if (value === password && value.length > 0) {
+          errors.push(
+            "Le nouveau mot de passe doit être différent de l'ancien."
+          );
+        }
+        break;
       default:
         break;
     }
@@ -207,6 +181,7 @@ const FormLogin = () => {
       password: [],
       name: [],
       firstname: [],
+      newPassword: [],
     });
 
     const violationsGrouped = violations.reduce(
@@ -217,10 +192,11 @@ const FormLogin = () => {
         if (propertyPath === "password") acc.password.push(title);
         if (propertyPath === "nom") acc.name.push(title);
         if (propertyPath === "prenom") acc.firstname.push(title);
+        if (propertyPath === "newPassword") acc.newPassword.push(title);
 
         return acc;
       },
-      { email: [], password: [], name: [], firstname: [] }
+      { email: [], password: [], name: [], firstname: [], newPassword: [] }
     );
     console.log("violationsGrouped", violationsGrouped);
 
@@ -229,6 +205,7 @@ const FormLogin = () => {
       password: violationsGrouped?.password,
       name: violationsGrouped?.name,
       firstname: violationsGrouped?.firstname,
+      newPassword: violationsGrouped?.newPassword,
     });
   };
 
@@ -269,7 +246,8 @@ const FormLogin = () => {
           dispatch(setAuthenticated(true));
           handleClose();
         }
-      } else {
+      }
+      if (type === "register") {
         // REGISTER
         const trimInfo = {
           email: email.trim(),
@@ -279,7 +257,34 @@ const FormLogin = () => {
         };
         const res = await register(trimInfo);
         if (res?.error?.data) {
+          if (res.error?.status === 404) {
+            setHelperText({
+              email: ["Email déjà utilisé"],
+            });
+          } else {
+            const violations = res.error.data.violations;
+            verifyErrors(violations).then(() => {
+              console.log("violations", violations);
+            });
+          }
+        }
+        if (res?.data?.message) {
           console.log("res", res);
+          openSnackbar(res.data.message, res.data.serverity);
+          setType("login");
+        }
+      }
+      if (type === "info") {
+        // INFO
+        const trimInfo = {
+          email: email.trim(),
+          password: password.trim(),
+          name: name.trim(),
+          firstname: firstname.trim(),
+          newPassword: newPassword.trim(),
+        };
+        const res = await update(trimInfo);
+        if (res?.error?.data) {
           const violations = res.error.data.violations;
           verifyErrors(violations).then(() => {
             console.log("violations", violations);
@@ -288,7 +293,8 @@ const FormLogin = () => {
         if (res?.data?.message) {
           console.log("res", res);
           openSnackbar(res.data.message, res.data.serverity);
-          setType("login");
+          // fermer le modal info
+          handleCloseInfo();
         }
       }
     } catch (error) {
@@ -307,6 +313,7 @@ const FormLogin = () => {
       password: "",
       name: "",
       firstname: "",
+      newPassword: "",
     });
     setType(type === "login" ? "register" : "login");
   };
@@ -319,7 +326,7 @@ const FormLogin = () => {
       }}
     >
       <FormControl fullWidth>
-        {type === "register" && (
+        {(type === "register" || type === "info") && (
           <>
             <TextField
               label="Nom"
@@ -359,7 +366,7 @@ const FormLogin = () => {
           </>
         )}
         <TextField
-          label="Email"
+          label="Adresse mail"
           value={email}
           variant="outlined"
           type="email"
@@ -376,7 +383,7 @@ const FormLogin = () => {
           }
         />
         <TextField
-          label="Password"
+          label="Mot de passe"
           value={password}
           variant="outlined"
           type="password"
@@ -389,9 +396,32 @@ const FormLogin = () => {
           onBlur={() => handleValidation("password", password)}
           error={helperText.password?.length > 0}
           helperText={
-            helperText.password?.length > 0 && helperText.password.join(", ")
+            (helperText.password?.length > 0 &&
+              helperText.password.join(", ")) ||
+            (type === "info" &&
+              "La saisie de votre mot de passe est obligatoire pour effectuer des modifications")
           }
         />
+        {type === "info" && (
+          <TextField
+            label="Nouveau mot de passe"
+            value={newPassword}
+            variant="outlined"
+            type="password"
+            margin="normal"
+            onChange={(e) => {
+              setNewPassword(e.target.value);
+              handleValidation("newPassword", e.target.value);
+            }}
+            onBlur={() => handleValidation("newPassword", newPassword)}
+            error={helperText.newPassword?.length > 0}
+            helperText={
+              (helperText.newPassword?.length > 0 &&
+                helperText.newPassword.join(", ")) ||
+              "Laissez vide si inchangé"
+            }
+          />
+        )}
         <Button
           variant="contained"
           color="primary"
@@ -401,29 +431,35 @@ const FormLogin = () => {
           sx={{ mt: 4 }}
         >
           <Spinner
-            isLoading={isLoading || isLoadingLogin}
+            isLoading={isLoading || isLoadingLogin || isLoadingUpdate}
             content={`${renderBtnText()}`}
           />
         </Button>
-        <div style={{ textAlign: "center" }}>
-          <Typography variant="body2" sx={{ mt: 2 }}>
-            {type === "login"
-              ? "Vous n'avez pas de compte ?"
-              : "Vous avez déjà un compte ?"}
-            <Button
-              color="primary"
-              onClick={(e) => {
-                e.preventDefault();
-                handleChangeType();
-              }}
-            >
-              {type === "login" ? "Inscrivez-vous" : "Connectez-vous"}
-            </Button>
-          </Typography>
-        </div>
+        {type !== "info" && (
+          <div style={{ textAlign: "center" }}>
+            <Typography variant="body2" sx={{ mt: 2 }}>
+              {type === "login"
+                ? "Vous n'avez pas de compte ?"
+                : "Vous avez déjà un compte ?"}
+              <Button
+                color="primary"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleChangeType();
+                }}
+              >
+                {type === "login" ? "Inscrivez-vous" : "Connectez-vous"}
+              </Button>
+            </Typography>
+          </div>
+        )}
       </FormControl>
     </form>
   );
+};
+
+FormLogin.propTypes = {
+  handleCloseInfo: PropTypes.func,
 };
 
 export default FormLogin;

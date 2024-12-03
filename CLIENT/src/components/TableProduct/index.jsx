@@ -257,7 +257,7 @@ const TableProducts = () => {
                     gap: 1,
                   }}
                 >
-                  <ButtonModify />
+                  <ButtonModify product={product} />
                   <ButtonDelete product={product} />
                 </TableCell>
               </TableRow>

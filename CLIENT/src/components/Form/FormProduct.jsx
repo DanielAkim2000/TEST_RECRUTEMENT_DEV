@@ -137,6 +137,9 @@ const FormProduct = ({ handleClose }) => {
       if (res?.error?.data?.violations?.length > 0) {
         verifyErrors(res.error.data.violations);
       }
+      if (res?.data?.message) {
+        openSnackbar(res.data.message, res.data.severity);
+      }
     } else {
       const res = await createProduct(trimmedProduct);
       if (res?.data?.message) {

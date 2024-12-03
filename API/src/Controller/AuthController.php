@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 class AuthController extends AbstractController
 {
@@ -38,7 +39,7 @@ class AuthController extends AbstractController
             $password = $content['password'] ?? "";
             $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
             if ($user) {
-                return new JsonResponse(['message' => 'Cet email est déjà utilisé', "severity" => "info"], 200);
+                return new JsonResponse(['message' => 'Cet email est déjà utilisé', "severity" => "info"], 404);
             }
             $user = new User();
             $user->setNom($nom);
@@ -53,31 +54,98 @@ class AuthController extends AbstractController
             $this->entityManager->flush();
             return new JsonResponse(['message' => 'Votre compte a été créé avec succès', "severity" => "success"], 201);
         } catch (\Exception $e) {
-            return new JsonResponse(['message' => $e->getMessage(), "severity" => "error"], 500);
+            return $this->json(['message' => 'Vous n\'êtes pas connecte', "severity" => "info"], 401);
         }
     }
 
-
-    #[Route('/auth/login', name: 'login', methods: ['POST'])]
-    public function login(Request $request): JsonResponse
+    #[Route('/auth/me', name: 'me', methods: ['GET'])]
+    public function me(Request $request): JsonResponse
     {
-        $content = json_decode($request->getContent(), true);
-        $email = $content['email'] ?? "";
-        $password = $content['password'] ?? "";
+        $authorization = $request->headers->get('Authorization');
         try {
-            $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
-            if (!$user) {
-                return new JsonResponse(['message' => 'Cet email n\'existe pas', "severity" => "info"], 200);
+            $token = explode(' ', $authorization)[1];
+            $token = $this->jwtManager->parse($token);
+            if (!$token) {
+                return $this->json(null, 200);
             }
-            if (!password_verify($password, $user->getPassword())) {
-                return new JsonResponse(['message' => 'Mot de passe incorrect', "severity" => "info"], 200);
-            }
+            $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $token['username']]);
 
-            $token = $this->jwtManager->create($user);
-
-            return new JsonResponse(['token' => $token, "severity" => "success"], 200);
+            return $this->json($user, 200, [], ['groups' => 'user:read']);
         } catch (\Exception $e) {
-            return new JsonResponse(['message' => $e->getMessage(), "severity" => "error"], 500);
+            return $this->json(['message' => 'Vous n\'êtes pas connecte', "severity" => "info"], 401);
+        }
+    }
+
+    #[Route('/auth/me', name: 'update', methods: ['PUT'])]
+    public function updateUser(Request $request): JsonResponse
+    {
+        $authorization = $request->headers->get('Authorization');
+        try {
+            $content = json_decode($request->getContent(), true);
+            $nom = $content['name'] ?? "";
+            $prenom = $content['firstname'] ?? "";
+            $email = $content['email'] ?? "";
+            $newPassword = $content['newPassword'] ?? "";
+            $password = $content['password'] ?? "";
+            $token = explode(' ', $authorization)[1];
+            $token = $this->jwtManager->parse($token);
+            if (!$token) {
+                return $this->json(['message' => 'Vous n\'êtes pas connecte', "severity" => "info"], 401);
+            }
+            $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $token['username']]);
+            //compare password with hash
+
+            if (!password_verify($password, $user->getPassword())) {
+                $violations = [
+                    "violations" => [
+                        [
+                            "propertyPath" => "password",
+                            "title" => "Mot de passe incorrect"
+                        ]
+                    ]
+                ];
+                return $this->json($violations, 404);
+            }
+
+            $usercheck = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+            if ($usercheck) {
+                $violations = [
+                    "violations" => [
+                        [
+                            "propertyPath" => "email",
+                            "title" => "Cet email est déjà utilisé"
+                        ]
+                    ]
+                ];
+                return $this->json($violations, 404);
+            }
+
+            if ($nom != "") {
+                $user->setNom($nom);
+            }
+
+            if ($prenom != "") {
+                $user->setPrenom($prenom);
+            }
+            if ($email != "") {
+                $user->setEmail($email);
+            }
+            if ($newPassword != "") {
+                $user->setPassword(password_hash($newPassword, PASSWORD_BCRYPT));
+            }
+            $errors = $this->validator->validate($user);
+            if (count($errors) > 0) {
+                return $this->json($errors, 400);
+            }
+
+
+
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+
+            return $this->json(['message' => 'Votre compte a été mis à jour avec succès', "severity" => "success"], 200);
+        } catch (\Exception $e) {
+            return $this->json(['message' => 'Vous n\'êtes pas connecte', "severity" => "info"], 401);
         }
     }
 }

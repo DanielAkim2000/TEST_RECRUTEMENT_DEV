@@ -7,11 +7,13 @@ const initialState = {
   name: "",
   email: "",
   password: "",
+  newPassword: "",
   helperText: {
     email: "",
     password: "",
     name: "",
     firstname: "",
+    newPassword: "",
   },
 };
 
@@ -40,6 +42,9 @@ const formLoginSlice = createSlice({
     setType: (state, action) => {
       state.type = action.payload;
     },
+    setNewPassword: (state, action) => {
+      state.newPassword = action.payload;
+    },
     handleClose: (state) => {
       state.isOpenFormLogin = false;
       state.email = "";
@@ -49,10 +54,12 @@ const formLoginSlice = createSlice({
         password: "",
         name: "",
         firstname: "",
+        newPassword: "",
       };
       state.name = "";
       state.firstname = "";
       state.type = "login";
+      state.newPassword = "";
     },
   },
 });
@@ -66,6 +73,7 @@ export const {
   setFirstName,
   setType,
   handleClose,
+  setNewPassword,
 } = formLoginSlice.actions;
 
 export default formLoginSlice.reducer;
@@ -78,4 +86,4 @@ export const selectHelperText = (state) => state.formLogin.helperText;
 export const selectName = (state) => state.formLogin.name;
 export const selectFirstName = (state) => state.formLogin.firstname;
 export const selectType = (state) => state.formLogin.type;
-
+export const selectNewPassword = (state) => state.formLogin.newPassword;

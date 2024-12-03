@@ -46,6 +46,10 @@ security:
         roles: [IS_AUTHENTICATED_FULLY, ROLE_USER],
         methods: [PUT, DELETE],
       }
+    - { path: ^/api/product, roles: PUBLIC_ACCESS, methods: GET }
+    - { path: ^/api/category, roles: PUBLIC_ACCESS, methods: GET }
+    - { path: ^/auth/me, roles: IS_AUTHENTICATED_FULLY, methods: GET }
+    - { path: ^/auth/me, roles: IS_AUTHENTICATED_FULLY, methods: PUT }
 
 # Configuration spécifique pour l'environnement de test (when@test)
 when@test:

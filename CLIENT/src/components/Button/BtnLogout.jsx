@@ -4,6 +4,7 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, selectIsAuthenticated } from "../../redux/slices/auth.slice";
 import useSnackbar from "../../hooks/useSnackbar";
+import BtnMyProfile from "./BtnMyProfile";
 
 const BtnLogout = () => {
   const isAuth = useSelector(selectIsAuthenticated);
@@ -53,7 +54,7 @@ const BtnLogout = () => {
           open={Boolean(anchorEl)}
           onClose={handleClose}
         >
-          <MenuItem onClick={handleClose}>Mon Compte</MenuItem>
+          <BtnMyProfile handleCloseModal={handleClose} />
           <MenuItem onClick={handleLogout}>Déconnexion</MenuItem>
         </Menu>
       </>

@@ -21,6 +21,7 @@ import BtnLoginOrRegister from "../Button/BtnLoginOrRegister";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "../../redux/slices/auth.slice";
 import BtnLogout from "../Button/BtnLogout";
+import { Link } from "react-router-dom";
 
 const pages = ["Produits", "Categories"];
 const navItems = ["Produits", "Categories"];
@@ -76,15 +77,11 @@ const Header = (props) => {
               >
                 <MenuIcon />
               </IconButton>
-              <Typography
-                variant="h6"
-                noWrap
-                component="a"
-                href="/"
-                sx={styles.textLogoMenu}
-              >
-                PRODIFY
-              </Typography>
+              <Link to="/" sx={styles.textLogo}>
+                <Typography variant="h6" noWrap sx={styles.textLogo}>
+                  Prodify
+                </Typography>
+              </Link>
             </Box>
             <InputSearchProductByName />
             <div className="ml-auto">

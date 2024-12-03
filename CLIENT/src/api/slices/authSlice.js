@@ -28,6 +28,14 @@ api.injectEndpoints({
       query: () => "/auth/me",
       providesTags: ["Auth"],
     }),
+    update: build.mutation({
+      query: (body) => ({
+        url: "/auth/me",
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Auth"],
+    }),
   }),
 });
 
@@ -36,4 +44,5 @@ export const {
   useRegisterMutation,
   useLogoutMutation,
   useMeQuery,
+  useUpdateMutation,
 } = api;

@@ -2,13 +2,16 @@ import { Box, Modal, Typography } from "@mui/material";
 import React from "react";
 import FormProduct from "../Form/FormProduct";
 import { useDispatch, useSelector } from "react-redux";
-import { resetFormProduct } from "../../redux/slices/formProduct.slice";
+import {
+  resetFormProduct,
+  setFormProduct,
+} from "../../redux/slices/formProduct.slice";
 import PropTypes from "prop-types";
 import BtnEffectHover from "./BtnEffectHover";
 import { selectIsAuthenticated } from "../../redux/slices/auth.slice";
 import { setOpenFormLogin } from "../../redux/slices/formLogin.slice";
 
-const ButtonModify = (props) => {
+const ButtonModify = ({ product }) => {
   const dispatch = useDispatch();
   const isAuth = useSelector(selectIsAuthenticated);
   const [open, setOpen] = React.useState(false);
@@ -16,6 +19,7 @@ const ButtonModify = (props) => {
     if (!isAuth) {
       return dispatch(setOpenFormLogin(true));
     } else {
+      dispatch(setFormProduct(product));
       setOpen(true);
     }
   };
@@ -73,7 +77,7 @@ const ButtonModify = (props) => {
 };
 
 ButtonModify.propTypes = {
-  onClick: PropTypes.func.isRequired,
+  product: PropTypes.object.isRequired,
 };
 
 export default ButtonModify;
