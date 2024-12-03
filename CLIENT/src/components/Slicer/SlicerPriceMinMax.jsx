@@ -14,7 +14,7 @@ function valuetext(value) {
   return `${value} €`;
 }
 
-const minDistance = 50000;
+const minDistance = 100000;
 
 const StyledSlider = styled(Slider)({
   color: "#007bff",
@@ -62,9 +62,11 @@ const InputPriceFilter = () => {
   const [maxPriceLabel, setMaxPriceLabel] = React.useState(1000000);
 
   // on met a ajour le prix max si la valeur change dans la base de donnée
+  // et on remet le prix min a 0
   React.useEffect(() => {
     if (data?.maxPrice && data.maxPrice !== maxPriceLabel) {
       setMaxPriceLabel(data.maxPrice);
+      dispatch(setPriceMin(0));
       dispatch(setPriceMax(data.maxPrice));
     }
   }, [data?.maxPrice, maxPriceLabel]);
@@ -122,7 +124,15 @@ const InputPriceFilter = () => {
             value: localPrice[1] !== null ? localPrice[1] : "",
             label: `${localPrice[1] !== null ? `${localPrice[1]} €` : ""}`,
           },
-          { value: maxPriceLabel, label: `Max (${maxPriceLabel} €)` },
+          {
+            value:
+              maxPriceLabel - localPrice[1] > minDistance ? maxPriceLabel : "",
+            label: `${
+              maxPriceLabel - localPrice[1] > minDistance
+                ? `Max ${maxPriceLabel} €`
+                : ""
+            }`,
+          },
         ]}
         step={Math.max(1, maxPriceLabel / 100)}
         disableSwap

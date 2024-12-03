@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import BtnEffectInverseHover from "./BtnEffectInverseHover";
 import {
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -18,7 +19,6 @@ import {
 } from "@mui/material";
 import {
   useDeleteCategoryMutation,
-  useGetCategoriesQuery,
   useUpdateCategoryMutation,
 } from "../../api/slices/category.slice";
 import CreateIcon from "@mui/icons-material/Create";
@@ -63,9 +63,13 @@ const RenderRow = (props) => {
   };
 
   const handleSubmit = async () => {
-    const res = await updateCategory(formCategory);
+    const trimCategory = {
+      name: formCategory.name.trim(),
+      id: formCategory.id,
+    };
+    const res = await updateCategory(trimCategory);
     if (res?.data?.message) {
-      openSnackbar(res.data.message, "success");
+      openSnackbar(res.data.message, res.data.severity);
     } else {
       openSnackbar(
         "Erreur lors de la modification de la catégorie, veuillez réessayer plus tard",
@@ -93,7 +97,7 @@ const RenderRow = (props) => {
   const handleDelete = async () => {
     const res = await deleteCategory(data[index]?.id);
     if (res?.data?.message) {
-      openSnackbar(res.data.message, "success");
+      openSnackbar(res.data.message, res.data.severity);
       handleClose();
     } else {
       openSnackbar(
@@ -157,13 +161,13 @@ const RenderRow = (props) => {
         {edit && (
           <IconButton
             onClick={
-              formCategory?.name?.length <= 3 ||
+              formCategory?.name?.length < 3 ||
               formCategory?.name?.length >= 255
                 ? null
                 : handleSubmit
             }
             disabled={
-              formCategory?.name?.length <= 3 ||
+              formCategory?.name?.length < 3 ||
               formCategory?.name?.length >= 255
             }
           >
@@ -213,16 +217,98 @@ const RenderRow = (props) => {
   );
 };
 
-// button pour voir toutes les categories
+// Votre composant de ligne
+
 const BtnSeeAllCategories = () => {
-  const [open, setOpen] = React.useState(false);
-  const { data: categories, isLoading, isError } = useGetCategoriesQuery();
+  const [open, setOpen] = useState(false);
+  const [categoriesState, setCategoriesState] = useState([]); // Les catégories chargées
+  const [offset, setOffset] = useState(0); // Offset pour la pagination
+  const [limit] = useState(20); // Limite de catégories par fetch
+  const [loading, setLoading] = useState(false); // État de chargement
+  const [hasMore, setHasMore] = useState(true); // S'il y a encore des catégories à charger
+  const [debounceTimer, setDebounceTimer] = useState(null); // Timer pour le debounce du scroll
+  const scrollRef = useRef(null);
+  const [prevOffset, setPrevOffset] = useState(null);
+
+  // fonction pour récupérer les catégories via l'API
+  const fetchMoreData = useCallback(async () => {
+    if (loading || !hasMore) return;
+    if (prevOffset === offset) return; // Vérifier si l'offset a changé
+    setLoading(true); // Activer le chargement
+    const res = await fetch(
+      `${
+        import.meta.env.VITE_API_URL
+      }/api/categories/scrollInfinite?offset=${offset}&limit=${limit}`
+    );
+    const data = await res.json();
+    console.log(data);
+    setPrevOffset(offset); // mettre à jour l'offset précédent
+    if (data.length === 0) {
+      setHasMore(false); // désactiver le chargement s'il n'y a pas de nouvelles
+      setLoading(false); // désactiver le chargement
+    } else if (data.map((item) => item.id).includes(categoriesState[0]?.id)) {
+      setHasMore(false); // désactiver le chargement s'il n'y a pas de nouvelles données
+      setLoading(false); // désactiver le chargement
+    } else {
+      setCategoriesState((prev) => [...prev, ...data]); // ajouter les nouvelles données
+      setOffset((prev) => prev + limit); // mettre à jour l'offset
+      setLoading(false); // désactiver le chargement
+    }
+  }, [loading, hasMore, offset, limit, prevOffset, categoriesState]);
+
+  // gestion du défilement infini
+  const handleScroll = useCallback(() => {
+    if (!scrollRef.current || loading || !hasMore) return;
+
+    const threshold = 5; // seuil de déclenchement du fetch
+    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+
+    if (clientHeight + scrollTop + threshold >= scrollHeight) {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer); // annuler l'ancien timer
+        setLoading(true); // activer le chargement
+      }
+
+      const newTimer = setTimeout(() => {
+        fetchMoreData(); // appeler fetchMoreData après un délai
+      }, 500); // délai de 500ms pour limiter les appels
+      setDebounceTimer(newTimer);
+    }
+  }, [fetchMoreData, loading, hasMore, debounceTimer]);
+
+  // effet pour charger les données initiales lors de l'ouverture de la modal
+  useEffect(() => {
+    if (open && offset === 0) {
+      setOffset(0); // réinitialiser l'offset
+      setLoading(true); // activer le chargement
+      fetchMoreData(); // charger les données
+      setHasMore(true); // activer le chargement
+    } else if (!open) {
+      setOffset(0); // réinitialiser l'offset
+      setLoading(false); // désactiver le chargement
+      setCategoriesState([]); // réinitialiser les catégories
+      setHasMore(true); // activer le chargement
+    }
+    return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer); // arrêter le debounce si la modal est fermée
+      }
+    };
+  }, [open, offset, debounceTimer]);
+
+  // ouverture de la modal
   const handleOpen = () => {
     setOpen(true);
   };
+
+  // fermeture de la modal
   const handleClose = () => {
     setOpen(false);
+    if (debounceTimer) {
+      clearTimeout(debounceTimer); // arrêter le debounce si la modal est fermée
+    }
   };
+
   return (
     <>
       <BtnEffectInverseHover color="slate-main" onClick={handleOpen}>
@@ -231,10 +317,12 @@ const BtnSeeAllCategories = () => {
       <Modal
         open={open}
         onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
       >
         <Box
+          ref={scrollRef}
+          onScroll={handleScroll}
           sx={{
             position: "absolute",
             top: "50%",
@@ -248,44 +336,56 @@ const BtnSeeAllCategories = () => {
             boxShadow: 24,
             borderRadius: 5,
             p: 4,
+            maxHeight: "80vh", // pour limiter la hauteur
+            overflowY: "scroll",
           }}
         >
-          {/* <FixedSizeList
-            height={400}
-            width={360}
-            itemSize={40}
-            itemCount={categories?.length}
-            overscanCount={5}
-            itemData={categories}
-          >
-            {RenderRow}
-          </FixedSizeList> */}
-          <div className="max-h-[400px] overflow-hidden overflow-y-auto min-w-full">
-            <div className="flex justify-between mb-5">
-              <Typography
-                variant="h5"
-                align="center"
-                marginX={"auto"}
-                fontWeight={"bold"}
-                sx={{
-                  color: "primary.main",
-                }}
-              >
-                Liste des catégories
-              </Typography>
-            </div>
-
-            <div className="flex justify-between w-full border-b py-1">
-              <Stack direction="row" spacing={2} alignItems={"center"}>
-                <span className="font-bold">#</span>
-                <span className="font-bold">Nom</span>
-              </Stack>
-              <span className="font-bold">Actions</span>
-            </div>
-            {categories?.map((category, index) => (
-              <RenderRow key={index} index={index} data={categories} />
-            ))}
+          <div className="flex justify-between mb-5">
+            <Typography
+              variant="h5"
+              align="center"
+              marginX="auto"
+              fontWeight="bold"
+              sx={{ color: "primary.main" }}
+            >
+              Liste des catégories
+            </Typography>
           </div>
+
+          <div className="flex justify-between w-full border-b py-1">
+            <Stack direction="row" spacing={2} alignItems="center">
+              <span className="font-bold">#</span>
+              <span className="font-bold">Nom</span>
+            </Stack>
+            <span className="font-bold">Actions</span>
+          </div>
+
+          {categoriesState.map((category, index) => (
+            <RenderRow key={index} index={index} data={categoriesState} />
+          ))}
+
+          {loading && (
+            <div className="flex justify-center mt-5">
+              <CircularProgress
+                sx={{
+                  color: "orange.main",
+                }}
+              />
+            </div>
+          )}
+
+          {!hasMore && (
+            <Typography
+              variant="h6"
+              align="center"
+              marginX="auto"
+              fontWeight="bold"
+              margin={2}
+              sx={{ color: "primary.main" }}
+            >
+              Vous avez atteint la fin de la liste
+            </Typography>
+          )}
         </Box>
       </Modal>
     </>

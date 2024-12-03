@@ -44,25 +44,7 @@ class ProductController extends AbstractController
 
             return $this->json($products, 200, [], ['groups' => self::GROUP_PRODUCT_READ]);
         } catch (\Exception $e) {
-            return $this->json(['message' => $e->getMessage()], 500);
-        }
-    }
-
-    #[Route(self::PRODUCT_ROUTE, name: 'get_product', methods: ['GET'])]
-    public function get_product(int $id): JsonResponse
-    {
-        try {
-            $product = $this->entityManager->getRepository(Product::class)->find($id);
-
-            if (!$product) {
-                return $this->json([
-                    'message' => self::MESSAGE_PRODUCT_NOT_FOUND
-                ], 404);
-            }
-
-            return $this->json($product, 200, [], ['groups' => self::GROUP_PRODUCT_READ]);
-        } catch (\Exception $e) {
-            return $this->json(['message' => $e->getMessage()], 500);
+            return $this->json(['message' => $e->getMessage(), 'severity' => 'error'], 500);
         }
     }
 
@@ -94,27 +76,27 @@ class ProductController extends AbstractController
             // si il y a des erreurs on les retourne
             if (count($errors) > 0) {
                 if ($errors[0]->getPropertyPath() === 'name') {
-                    return $this->json(['message' => 'Vérifiez le nom du produit'], 200);
+                    return $this->json(['message' => 'Vérifiez le nom du produit', 'severity' => 'error'], 200);
                 }
                 if ($errors[0]->getPropertyPath() === 'price') {
-                    return $this->json(['message' => 'Vérifiez le prix du produit'], 200);
+                    return $this->json(['message' => 'Vérifiez le prix du produit', 'severity' => 'error'], 200);
                 }
                 if ($errors[0]->getPropertyPath() === 'description') {
-                    return $this->json(['message' => 'Vérifiez la description du produit'], 200);
+                    return $this->json(['message' => 'Vérifiez la description du produit', 'severity' => 'error'], 200);
                 }
                 if ($errors[0]->getPropertyPath() === 'category') {
-                    return $this->json(['message' => 'Vérifiez la catégorie du produit'], 200);
+                    return $this->json(['message' => 'Vérifiez la catégorie du produit', 'severity' => 'error'], 200);
                 }
-                return $this->json(['message' => $errors[0]->getPropertyPath()], 200);
+                return $this->json(['message' => $errors[0]->getPropertyPath(), 'severity' => 'error'], 200);
             }
 
             // on persiste et on flush
             $this->entityManager->persist($product);
             $this->entityManager->flush();
 
-            return $this->json(['message' => 'Produit ajouté avec succès'], 201);
+            return $this->json(['message' => 'Produit ajouté avec succès', 'severity' => 'success'], 200);
         } catch (\Exception $e) {
-            return $this->json(['message' => $e->getMessage()], 500);
+            return $this->json(['message' => $e->getMessage(), 'severity' => 'error'], 500);
         }
     }
 
@@ -125,7 +107,8 @@ class ProductController extends AbstractController
             $product = $this->entityManager->getRepository(Product::class)->find($id);
             if (!$product) {
                 return $this->json([
-                    'message' => "Ce produit n'existe pas ou a été supprimé"
+                    'message' => "Ce produit n'existe pas ou a été supprimé",
+                    "severity" => 'error',
                 ], 200);
             }
             $content = $request->getContent();
@@ -145,25 +128,25 @@ class ProductController extends AbstractController
             $errors = $this->validator->validate($product);
             if (count($errors) > 0) {
                 if ($errors[0]->getPropertyPath() === 'name') {
-                    return $this->json(['message' => 'Vérifiez le nom du produit'], 200);
+                    return $this->json(['message' => 'Vérifiez le nom du produit', 'severity' => 'error'], 200);
                 }
                 if ($errors[0]->getPropertyPath() === 'price') {
-                    return $this->json(['message' => 'Vérifiez le prix du produit'], 200);
+                    return $this->json(['message' => 'Vérifiez le prix du produit', 'severity' => 'error'], 200);
                 }
                 if ($errors[0]->getPropertyPath() === 'description') {
-                    return $this->json(['message' => 'Vérifiez la description du produit'], 200);
+                    return $this->json(['message' => 'Vérifiez la description du produit', 'severity' => 'error'], 200);
                 }
                 if ($errors[0]->getPropertyPath() === 'category') {
-                    return $this->json(['message' => 'Vérifiez la catégorie du produit'], 200);
+                    return $this->json(['message' => 'Vérifiez la catégorie du produit', 'severity' => 'error'], 200);
                 }
             }
 
             $this->entityManager->persist($product);
             $this->entityManager->flush();
 
-            return $this->json(["message" => "Produit modifié avec succès"], 200);
+            return $this->json(["message" => "Produit modifié avec succès", 'severity' => 'success'], 200);
         } catch (\Exception $e) {
-            return $this->json(['message' => $e->getMessage()], 500);
+            return $this->json(['message' => $e->getMessage(), 'severity' => 'error'], 500);
         }
     }
 
@@ -183,9 +166,12 @@ class ProductController extends AbstractController
             $this->entityManager->remove($product);
             $this->entityManager->flush();
 
-            return $this->json(['message' => 'Produit supprimé'], 200);
+            return $this->json([
+                'message' => 'Produit supprimé',
+                'severity' => 'success'
+            ], 200);
         } catch (\Exception $e) {
-            return $this->json(['message' => $e->getMessage()], 500);
+            return $this->json(['message' => $e->getMessage(), 'severity' => 'error'], 500);
         }
     }
 
@@ -211,7 +197,10 @@ class ProductController extends AbstractController
                 "totalPages" => $totalPages,
             ], 200, [], ['groups' => self::GROUP_PRODUCT_READ]);
         } catch (\Exception $e) {
-            return $this->json(['message' => $e->getMessage()], 500);
+            return $this->json([
+                'message' => $e->getMessage(),
+                'severity' => 'error'
+            ], 500);
         }
     }
 
@@ -226,9 +215,16 @@ class ProductController extends AbstractController
                 $this->entityManager->remove($product);
             }
             $this->entityManager->flush();
-            return $this->json(['message' => 'Les produits ont été supprimés'], 200);
+
+            return $this->json([
+                'message' => 'Les produits ont été supprimés',
+                'severity' => 'success'
+            ], 200);
         } catch (\Exception $e) {
-            return $this->json(['message' => "Une erreur est survenue lors de la suppression des produits"], 500);
+            return $this->json([
+                'message' => "Une erreur est survenue lors de la suppression des produits",
+                'severity' => 'error'
+            ], 500);
         }
     }
 
@@ -239,7 +235,10 @@ class ProductController extends AbstractController
             $maxPrice = $this->entityManager->getRepository(Product::class)->getMaxPrice();
             return $this->json(['maxPrice' => $maxPrice], 200);
         } catch (\Exception $e) {
-            return $this->json(['message' => $e->getMessage()], 500);
+            return $this->json([
+                'message' => $e->getMessage(),
+                'severity' => 'error'
+            ], 500);
         }
     }
 }

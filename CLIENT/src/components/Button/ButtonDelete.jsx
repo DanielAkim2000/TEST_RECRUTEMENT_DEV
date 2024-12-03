@@ -10,7 +10,6 @@ import {
   Slide,
 } from "@mui/material";
 import { useDeleteProductMutation } from "../../api/slices/product.slice";
-import { useEffect } from "react";
 import useSnackBar from "../../hooks/useSnackBar";
 import PropTypes from "prop-types";
 import Spinner from "../Spinner";
@@ -33,18 +32,23 @@ const ButtonDelete = ({ product }) => {
   };
 
   const handleDelete = async () => {
-    await deleteProduct(product?.id);
+    const res = await deleteProduct(product.id);
+    if (res?.data?.message) {
+      openSnackbar(res.data.message, res.data.severity);
+    } else {
+      openSnackbar("Erreur lors de la suppression du produit", "error");
+    }
     setOpen(false);
   };
 
-  useEffect(() => {
-    if (isSuccess) {
-      openSnackbar("Produit supprimé avec succès", "success");
-    }
-    if (isError) {
-      openSnackbar("Erreur lors de la suppression du produit", "error");
-    }
-  }, [isSuccess, isError, openSnackbar]);
+  // useEffect(() => {
+  //   if (isSuccess) {
+  //     openSnackbar("Produit supprimé avec succès", "success");
+  //   }
+  //   if (isError) {
+  //     openSnackbar("Erreur lors de la suppression du produit", "error");
+  //   }
+  // }, [isSuccess, isError, openSnackbar]);
   return (
     <>
       <BtnEffectHover onClick={handleClickOpen} color="red-main">

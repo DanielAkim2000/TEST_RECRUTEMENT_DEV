@@ -115,7 +115,7 @@ const TableProducts = () => {
   const handleDelete = async () => {
     const res = await deleteProducts(productsSelected);
     setOpenDialog(false);
-    openSnackbar(res.data.message);
+    openSnackbar(res.data.message, res.data.severity);
     setProductsSelected([]);
   };
 

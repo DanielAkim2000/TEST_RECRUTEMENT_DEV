@@ -87,7 +87,7 @@ const FormProduct = (props) => {
         if (id) {
           const res = await updateProduct(trimProduct);
           if (res?.data?.message) {
-            openSnackbar(res.data.message, "success");
+            openSnackbar(res.data.message, res.data.severity);
           } else {
             openSnackbar(
               "Erreur lors de la modification du produit, veuillez réessayer plus tard",
@@ -95,7 +95,15 @@ const FormProduct = (props) => {
             );
           }
         } else {
-          await createProduct(trimProduct);
+          const res = await createProduct(trimProduct);
+          if (res?.data?.message) {
+            openSnackbar(res.data.message, res.data.severity);
+          } else {
+            openSnackbar(
+              "Erreur lors de la création du produit, veuillez réessayer plus tard",
+              "error"
+            );
+          }
         }
       }}
     >

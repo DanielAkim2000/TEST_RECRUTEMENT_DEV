@@ -49,13 +49,14 @@ const FormCategory = (props) => {
         e.preventDefault();
         if (isSubmitDisabled()) {
           openSnackbar(
-            "Veuillez vérifier que le nom de la catégorie contient entre 3 et 255 caractères."
+            "Veuillez vérifier que le nom de la catégorie contient entre 3 et 255 caractères.",
+            "error"
           );
         }
         const trimCategory = { name: name.trim() };
         const res = await createCategory(trimCategory);
         if (res?.data?.message) {
-          openSnackbar(res.data.message, "success");
+          openSnackbar(res.data.message, res.data.severity);
         } else {
           openSnackbar(
             "Erreur lors de la création de la catégorie, veuillez réessayer plus tard",

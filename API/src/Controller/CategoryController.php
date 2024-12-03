@@ -40,7 +40,7 @@ class CategoryController extends AbstractController
 
             return $this->json($categories, 200, [], ['groups' => 'category:read']);
         } catch (\Exception $e) {
-            return $this->json(['message' => $e->getMessage()], 500);
+            return $this->json(['message' => $e->getMessage(), "severity" => "error"], 500);
         }
     }
 
@@ -59,7 +59,7 @@ class CategoryController extends AbstractController
 
             return $this->json($category, 200, [], ['groups' => 'category:read']);
         } catch (\Exception $e) {
-            return $this->json(['message' => self::MESSAGE_CATEGORY_ERROR], 500);
+            return $this->json(['message' => self::MESSAGE_CATEGORY_ERROR, "severity" => "error"], 500);
         }
     }
 
@@ -80,9 +80,9 @@ class CategoryController extends AbstractController
             $this->entityManager->persist($category);
             $this->entityManager->flush();
 
-            return $this->json(['message' => 'Categorie créée'], 201);
+            return $this->json(['message' => 'Categorie créée', "severity" => "success"], 201);
         } catch (\Exception $e) {
-            return $this->json(['message' => self::MESSAGE_CATEGORY_ERROR], 500);
+            return $this->json(['message' => self::MESSAGE_CATEGORY_ERROR, "severity" => "error"], 500);
         }
     }
 
@@ -95,7 +95,7 @@ class CategoryController extends AbstractController
             $category = $this->entityManager->getRepository(Category::class)->find($id);
 
             if (!$category) {
-                return $this->json(['message' => "Cette catégorie n'existe pas ou a été supprimée"], 200);
+                return $this->json(['message' => "Cette catégorie n'existe pas ou a été supprimée", "severity" => "error"], 200);
             }
 
             $category->setName($content['name']);
@@ -103,9 +103,9 @@ class CategoryController extends AbstractController
             $this->entityManager->persist($category);
             $this->entityManager->flush();
 
-            return $this->json(['message' => 'La catégorie a été modifiée avec succès'], 200);
+            return $this->json(['message' => 'La catégorie a été modifiée avec succès', "severity" => "success"], 200);
         } catch (\Exception $e) {
-            return $this->json(['message' => self::MESSAGE_CATEGORY_ERROR], 500);
+            return $this->json(['message' => self::MESSAGE_CATEGORY_ERROR, "severity" => "error"], 500);
         }
     }
 
@@ -116,19 +116,35 @@ class CategoryController extends AbstractController
             $category = $this->entityManager->getRepository(Category::class)->find($id);
 
             if (!$category) {
-                return $this->json(['message' => "Cette catégorie n'existe pas ou a été supprimée"], 200);
+                return $this->json(['message' => "Cette catégorie n'existe pas ou a été supprimée", "severity" => "error"], 200);
             }
 
             if ($category->getProducts()->count() > 0) {
-                return $this->json(['message' => 'Cette catégorie est utilisée par un ou plusieurs produits , vous ne pouvez pas la supprimer'], 200);
+                return $this->json(['message' => 'Cette catégorie est utilisée par un ou plusieurs produits , vous ne pouvez pas la supprimer', "severity" => "error"], 200);
             }
 
             $this->entityManager->remove($category);
             $this->entityManager->flush();
 
-            return $this->json(['message' => 'La catégorie a été supprimée avec succès'], 200);
+            return $this->json(['message' => 'La catégorie a été supprimée avec succès', "severity" => "success"], 200);
         } catch (\Exception $e) {
-            return $this->json(['message' => self::MESSAGE_CATEGORY_ERROR], 500);
+            return $this->json(['message' => self::MESSAGE_CATEGORY_ERROR, "severity" => "error"], 500);
+        }
+    }
+
+    #[Route('/categories/scrollInfinite', name: 'get_categories_scrollInfinite', methods: ['GET'])]
+    public function get_categories_scrollInfinite(Request $request): JsonResponse
+    {
+        try {
+            $offset = $request->query->get('offset');
+            $limit = $request->query->get('limit');
+
+            $repository = $this->entityManager->getRepository(Category::class);
+            $categories = $repository->findBy([], [], $limit, $offset);
+
+            return $this->json($categories, 200, [], ['groups' => 'category:read']);
+        } catch (\Exception $e) {
+            return $this->json(['message' => $e->getMessage(), "severity" => "error"], 500);
         }
     }
 }

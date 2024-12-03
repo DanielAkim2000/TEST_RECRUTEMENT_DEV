@@ -1,14 +1,24 @@
-//snackbar context
-import { Snackbar } from "@mui/material";
+import { Snackbar, styled } from "@mui/material";
 import { useEffect, useState } from "react";
 import { SnackbarContext } from "../snackbar.context";
+import PropTypes from "prop-types";
+
+const StyledSnackbar = styled(Snackbar)(({ theme, severity }) => ({
+  "& .MuiSnackbarContent-root": {
+    backgroundColor:
+      theme.palette[severity]?.main || theme.palette.success.main, // fallback to success if severity is undefined
+    color: theme.palette.common.white,
+  },
+}));
 
 const SnackbarContextProvider = ({ children }) => {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
+  const [severity, setSeverity] = useState("success");
 
-  const openSnackbar = (message) => {
+  const openSnackbar = (message, severity = "success") => {
     setMessage(message);
+    setSeverity(severity);
     setOpen(true);
   };
 
@@ -27,14 +37,19 @@ const SnackbarContextProvider = ({ children }) => {
   return (
     <SnackbarContext.Provider value={{ openSnackbar, closeSnackbar }}>
       {children}
-      <Snackbar
+      <StyledSnackbar
         open={open}
-        autoHideDuration={4000}
+        autoHideDuration={5000}
         onClose={closeSnackbar}
         message={message}
+        severity={severity} // Pass severity as prop to StyledSnackbar
       />
     </SnackbarContext.Provider>
   );
+};
+
+SnackbarContextProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export default SnackbarContextProvider;

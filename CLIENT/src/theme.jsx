@@ -3,6 +3,20 @@ import { createTheme } from "@mui/material";
 const theme = createTheme({
   fontFamily: "'Nunito', sans-serif",
   palette: {
+    severity: {
+      success: {
+        main: "#28a745",
+      },
+      error: {
+        main: "#dc3545",
+      },
+      warning: {
+        main: "#ffc107",
+      },
+      info: {
+        main: "#17a2b8",
+      },
+    },
     primary: {
       main: "#007bff",
     },
