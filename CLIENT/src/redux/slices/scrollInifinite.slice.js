@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   offset: 0,
-  limit: 20,
+  limit: 25,
   data: [],
 };
 
@@ -17,11 +17,7 @@ const scrollInfiniteSlice = createSlice({
       state.limit = action.payload;
     },
     setData: (state, action) => {
-      // verifier si les donnees sont pas deja dans le state
-      const newData = action.payload.filter((item) => {
-        return !state.data.some((item2) => item2.id === item.id);
-      });
-      state.data = [...state.data, ...newData];
+      state.data = [...state.data, ...action.payload];
     },
   },
 });

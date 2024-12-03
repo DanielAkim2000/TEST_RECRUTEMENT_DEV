@@ -34,6 +34,13 @@ import {
 import PropTypes from "prop-types";
 import useSnackBar from "../../hooks/useSnackBar";
 import Spinner from "../Spinner";
+import {
+  selectData,
+  selectLimit,
+  selectOffset,
+  setData,
+  setOffset,
+} from "../../redux/slices/scrollInifinite.slice";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -221,9 +228,12 @@ const RenderRow = (props) => {
 
 const BtnSeeAllCategories = () => {
   const [open, setOpen] = useState(false);
-  const [categoriesState, setCategoriesState] = useState([]); // Les catégories chargées
-  const [offset, setOffset] = useState(0); // Offset pour la pagination
-  const [limit] = useState(20); // Limite de catégories par fetch
+  const categoriesState = useSelector(selectData);
+  // const [offset, setOffset] = useState(0); // Offset pour la pagination
+  const offset = useSelector(selectOffset);
+  const limit = useSelector(selectLimit);
+  const dispatch = useDispatch();
+  // const [limit] = useState(20); // Limite de catégories par fetch
   const [loading, setLoading] = useState(false); // État de chargement
   const [hasMore, setHasMore] = useState(true); // S'il y a encore des catégories à charger
   const [debounceTimer, setDebounceTimer] = useState(null); // Timer pour le debounce du scroll
@@ -233,7 +243,7 @@ const BtnSeeAllCategories = () => {
   // fonction pour récupérer les catégories via l'API
   const fetchMoreData = useCallback(async () => {
     if (loading || !hasMore) return;
-    if (prevOffset === offset) return; // Vérifier si l'offset a changé
+    if (prevOffset >= offset && prevOffset) return; // Vérifier si l'offset a changé
     setLoading(true); // Activer le chargement
     const res = await fetch(
       `${
@@ -245,28 +255,28 @@ const BtnSeeAllCategories = () => {
     setPrevOffset(offset); // mettre à jour l'offset précédent
     if (data.length === 0) {
       setHasMore(false); // désactiver le chargement s'il n'y a pas de nouvelles
-      setLoading(false); // désactiver le chargement
     } else if (data.map((item) => item.id).includes(categoriesState[0]?.id)) {
       setHasMore(false); // désactiver le chargement s'il n'y a pas de nouvelles données
-      setLoading(false); // désactiver le chargement
     } else {
-      setCategoriesState((prev) => [...prev, ...data]); // ajouter les nouvelles données
-      setOffset((prev) => prev + limit); // mettre à jour l'offset
-      setLoading(false); // désactiver le chargement
+      dispatch(setData(data)); // mettre à jour les catégories
+      // setOffset((prev) => prev + limit); // mettre à jour l'offset
+      dispatch(setOffset(offset + limit)); // mettre à jour l'offset
     }
-  }, [loading, hasMore, offset, limit, prevOffset, categoriesState]);
+    setLoading(false); // désactiver le chargement
+  }, [prevOffset, offset, limit, loading, hasMore, categoriesState, dispatch]);
 
   // gestion du défilement infini
   const handleScroll = useCallback(() => {
     if (!scrollRef.current || loading || !hasMore) return;
 
-    const threshold = 5; // seuil de déclenchement du fetch
+    const threshold = 0; // seuil de déclenchement du fetch
     const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
 
     if (clientHeight + scrollTop + threshold >= scrollHeight) {
       if (debounceTimer) {
         clearTimeout(debounceTimer); // annuler l'ancien timer
         setLoading(true); // activer le chargement
+        scrollRef.current.scrollTo = scrollHeight; // scroller en bas
       }
 
       const newTimer = setTimeout(() => {
@@ -278,23 +288,10 @@ const BtnSeeAllCategories = () => {
 
   // effet pour charger les données initiales lors de l'ouverture de la modal
   useEffect(() => {
-    if (open && offset === 0) {
-      setOffset(0); // réinitialiser l'offset
-      setLoading(true); // activer le chargement
-      fetchMoreData(); // charger les données
-      setHasMore(true); // activer le chargement
-    } else if (!open) {
-      setOffset(0); // réinitialiser l'offset
-      setLoading(false); // désactiver le chargement
-      setCategoriesState([]); // réinitialiser les catégories
-      setHasMore(true); // activer le chargement
+    if (open && categoriesState.length === 0) {
+      fetchMoreData();
     }
-    return () => {
-      if (debounceTimer) {
-        clearTimeout(debounceTimer); // arrêter le debounce si la modal est fermée
-      }
-    };
-  }, [open, offset, debounceTimer]);
+  }, [open, fetchMoreData, categoriesState]);
 
   // ouverture de la modal
   const handleOpen = () => {
