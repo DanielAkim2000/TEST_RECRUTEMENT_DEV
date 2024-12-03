@@ -75,19 +75,7 @@ class ProductController extends AbstractController
             $errors = $this->validator->validate($product);
             // si il y a des erreurs on les retourne
             if (count($errors) > 0) {
-                if ($errors[0]->getPropertyPath() === 'name') {
-                    return $this->json(['message' => 'Vérifiez le nom du produit', 'severity' => 'error'], 200);
-                }
-                if ($errors[0]->getPropertyPath() === 'price') {
-                    return $this->json(['message' => 'Vérifiez le prix du produit', 'severity' => 'error'], 200);
-                }
-                if ($errors[0]->getPropertyPath() === 'description') {
-                    return $this->json(['message' => 'Vérifiez la description du produit', 'severity' => 'error'], 200);
-                }
-                if ($errors[0]->getPropertyPath() === 'category') {
-                    return $this->json(['message' => 'Vérifiez la catégorie du produit', 'severity' => 'error'], 200);
-                }
-                return $this->json(['message' => $errors[0]->getPropertyPath(), 'severity' => 'error'], 200);
+                return $this->json($errors, 400);
             }
 
             // on persiste et on flush
@@ -127,18 +115,7 @@ class ProductController extends AbstractController
 
             $errors = $this->validator->validate($product);
             if (count($errors) > 0) {
-                if ($errors[0]->getPropertyPath() === 'name') {
-                    return $this->json(['message' => 'Vérifiez le nom du produit', 'severity' => 'error'], 200);
-                }
-                if ($errors[0]->getPropertyPath() === 'price') {
-                    return $this->json(['message' => 'Vérifiez le prix du produit', 'severity' => 'error'], 200);
-                }
-                if ($errors[0]->getPropertyPath() === 'description') {
-                    return $this->json(['message' => 'Vérifiez la description du produit', 'severity' => 'error'], 200);
-                }
-                if ($errors[0]->getPropertyPath() === 'category') {
-                    return $this->json(['message' => 'Vérifiez la catégorie du produit', 'severity' => 'error'], 200);
-                }
+                return $this->json($errors, 400);
             }
 
             $this->entityManager->persist($product);

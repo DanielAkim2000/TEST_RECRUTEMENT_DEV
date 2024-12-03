@@ -15,12 +15,12 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
-import LoginIcon from "@mui/icons-material/Login";
 import PropTypes from "prop-types";
 import ButtonAdCategory from "../Button/ButtonAdCategory";
 import ButtonAdProduct from "../Button/ButtonAdProduct";
 import BtnSeeAllCategories from "../Button/BtnSeeAllCategories";
 import InputSearchProductByName from "../Input/InputSearchProductByName";
+import BtnLogin from "../Button/BtnLogin";
 
 const pages = ["Produits", "Categories"];
 const navItems = ["Produits", "Categories"];
@@ -129,9 +129,7 @@ const Header = (props) => {
                 </div>
               ) : (
                 <div>
-                  <IconButton size="large" color="inherit">
-                    <LoginIcon />
-                  </IconButton>
+                  <BtnLogin />
                 </div>
               )}
             </div>

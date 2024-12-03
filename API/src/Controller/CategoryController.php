@@ -100,6 +100,10 @@ class CategoryController extends AbstractController
 
             $category->setName($content['name']);
 
+            $errors = $this->validator->validate($category);
+            if (count($errors) > 0) {
+                return $this->json(['message' => $errors[0]->getMessage()], 400);
+            }
             $this->entityManager->persist($category);
             $this->entityManager->flush();
 
@@ -120,7 +124,7 @@ class CategoryController extends AbstractController
             }
 
             if ($category->getProducts()->count() > 0) {
-                return $this->json(['message' => 'Cette catégorie est utilisée par un ou plusieurs produits , vous ne pouvez pas la supprimer', "severity" => "error"], 200);
+                return $this->json(['message' => 'Cette catégorie est utilisée par un ou plusieurs produits , vous ne pouvez pas la supprimer', "severity" => "info"], 200);
             }
 
             $this->entityManager->remove($category);
