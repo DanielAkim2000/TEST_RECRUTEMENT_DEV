@@ -28,6 +28,7 @@ const BtnMyProfile = ({ handleCloseModal }) => {
   console.log("user", user);
   const dispatch = useDispatch();
   const handleOpen = () => {
+    handleCloseModal();
     if (isAuth) {
       setOpen(true);
       dispatch(setType("info"));
@@ -37,8 +38,6 @@ const BtnMyProfile = ({ handleCloseModal }) => {
       dispatch(setPassword(""));
       dispatch(setUser(user));
       dispatch(setNewPassword(""));
-
-      handleCloseModal();
     }
   };
 

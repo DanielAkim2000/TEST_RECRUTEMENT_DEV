@@ -6,19 +6,19 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import Spinner from "../src/components/Spinner";
+import Spinner from "../Spinner";
 import {
   useLoginMutation,
   useRegisterMutation,
   useUpdateMutation,
-} from "../src/api/slices/authSlice";
+} from "../../api/slices/authSlice";
 import { useDispatch, useSelector } from "react-redux";
-import useSnackbar from "../src/hooks/useSnackBar";
+import useSnackbar from "../../hooks/useSnackBar";
 import {
   logout,
   setAuthenticated,
   setToken,
-} from "../src/redux/slices/auth.slice";
+} from "../../redux/slices/auth.slice";
 import {
   selectEmail,
   selectFirstName,
@@ -35,7 +35,7 @@ import {
   setHelperText as setHelperTextFormLogin,
   selectNewPassword,
   setNewPassword as setNewPasswordFormLogin,
-} from "../src/redux/slices/formLogin.slice";
+} from "../../redux/slices/formLogin.slice";
 import PropTypes from "prop-types";
 import { useState } from "react";
 
@@ -434,7 +434,7 @@ const FormLogin = ({ handleCloseInfo = null }) => {
             }
           />
         )}
-        <div className="mt-2 flex flex-row items-center justify-start">
+        <div className="flex flex-row items-center justify-start mt-2">
           <Checkbox
             onClick={() => {
               setTypePassword(

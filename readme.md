@@ -130,7 +130,7 @@ VITE_API_URL=http://127.0.0.1:8000
    Vous pouvez maintenant démarrer le serveur de développement pour l’interface frontend avec la commande suivante :
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 Le frontend sera accessible à l’adresse http://localhost:5173.
