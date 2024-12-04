@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { Box, Button, TextField } from "@mui/material";
 import SelectCategories from "../Select/SelectCategories";
 import { useSelector, useDispatch } from "react-redux";
@@ -18,6 +18,7 @@ import useSnackbar from "../../hooks/useSnackBar";
 
 const regexTEXT = /^[a-zA-Z0-9\s]*$/;
 const regexNUMBER = /^[0-9]*$/;
+const regexFLOAT = /^[0-9.,]*$/;
 
 const FormProduct = ({ handleClose }) => {
   const product = useSelector(selectFormProduct);
@@ -41,12 +42,6 @@ const FormProduct = ({ handleClose }) => {
     description: false,
   });
 
-  useEffect(() => {
-    if (isSuccess || isSuccessAdd) {
-      handleClose();
-    }
-  }, [isSuccess, isSuccessAdd, handleClose]);
-
   const validateField = useCallback((field, value) => {
     const errors = [];
     switch (field) {
@@ -61,7 +56,7 @@ const FormProduct = ({ handleClose }) => {
 
       case "price":
         if (value <= 0) errors.push("Le prix doit être supérieur à 0");
-        if (!regexNUMBER.test(value?.toString()))
+        if (!regexFLOAT.test(value?.toString()))
           errors.push("Le prix doit être un nombre valide");
         break;
 
@@ -82,11 +77,13 @@ const FormProduct = ({ handleClose }) => {
 
   const hasError = useCallback(
     (field) => {
-      if (!touched[field]) return false;
+      if (!touched[field]) {
+        if (!id) return false;
+      }
       const errors = validateField(field, product[field]);
       return errors?.length > 0;
     },
-    [touched, validateField, product]
+    [touched, validateField, product, id]
   );
 
   const isSubmitDisabled = () => {
@@ -98,20 +95,36 @@ const FormProduct = ({ handleClose }) => {
     );
   };
 
-  const verifyErrors = (violations) => {
-    const violationsGrouped = violations.reduce((acc, violation) => {
-      const { propertyPath, title } = violation;
-      if (!acc[propertyPath]) {
-        acc[propertyPath] = [];
-      }
-      acc[propertyPath].push(title);
-      return acc;
-    }, {});
+  const verifyErrors = async (violations) => {
+    setHelperText({
+      name: [],
+      price: [],
+      description: [],
+    });
 
-    setHelperText((prev) => ({
-      ...prev,
-      ...violationsGrouped,
-    }));
+    const violationsGrouped = violations.reduce(
+      (acc, violation) => {
+        const { propertyPath, title } = violation;
+
+        if (propertyPath === "name") acc.name.push(title);
+        if (propertyPath === "price") acc.price.push(title);
+        if (propertyPath === "description") acc.description.push(title);
+
+        return acc;
+      },
+      {
+        name: [],
+        price: [],
+        description: [],
+      }
+    );
+    console.log("violationsGrouped", violationsGrouped);
+
+    setHelperText({
+      name: violationsGrouped.name,
+      price: violationsGrouped.price,
+      description: violationsGrouped.description,
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -133,10 +146,14 @@ const FormProduct = ({ handleClose }) => {
 
     if (id) {
       const res = await updateProduct(trimmedProduct);
-      if (res?.error?.data?.violations?.length > 0) {
+      if (res?.data) {
+        openSnackbar(res.data.message, res.data.severity);
+        handleClose();
+      }
+      if (res?.error?.data) {
         verifyErrors(res.error.data.violations);
       }
-      if (res?.data?.message) {
+      if (res?.error.data?.message) {
         openSnackbar(res.data.message, res.data.severity);
       }
     } else {
@@ -153,7 +170,6 @@ const FormProduct = ({ handleClose }) => {
     <Box
       component="form"
       sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}
-      onSubmit={handleSubmit}
     >
       <TextField
         variant="outlined"
@@ -191,7 +207,10 @@ const FormProduct = ({ handleClose }) => {
       <TextField
         multiline
         error={hasError("description")}
-        helperText={touched.description && helperText?.description?.join(", ")}
+        helperText={
+          helperText?.description?.length > 0 &&
+          helperText?.description?.join(", ")
+        }
         rows={4}
         variant="outlined"
         label="Description"
@@ -209,8 +228,12 @@ const FormProduct = ({ handleClose }) => {
       <SelectCategories />
       <Button
         variant="contained"
-        color="primary"
-        type="submit"
+        sx={{
+          backgroundColor: id ? "orange.main" : "primary.main",
+          color: "white",
+          "&:hover": { backgroundColor: id ? "orange.dark" : "primary.dark" },
+        }}
+        onClick={handleSubmit}
         disabled={isSubmitDisabled()}
       >
         {id ? (

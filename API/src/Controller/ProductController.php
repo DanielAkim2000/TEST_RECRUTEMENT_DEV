@@ -97,7 +97,7 @@ class ProductController extends AbstractController
                 return $this->json([
                     'message' => "Ce produit n'existe pas ou a été supprimé",
                     "severity" => 'error',
-                ], 200);
+                ], 404);
             }
             $content = $request->getContent();
             $data =  json_decode($content, true);

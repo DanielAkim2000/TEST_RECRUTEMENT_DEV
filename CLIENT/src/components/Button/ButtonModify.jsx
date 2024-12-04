@@ -25,11 +25,7 @@ const ButtonModify = ({ product }) => {
   };
   const handleClose = () => {
     setOpen(false);
-    const timer = setTimeout(() => {
-      dispatch(resetFormProduct());
-    }, 500);
-
-    return () => clearTimeout(timer);
+    dispatch(resetFormProduct());
   };
 
   return (
@@ -65,7 +61,7 @@ const ButtonModify = ({ product }) => {
             align="center"
             fontWeight="bold"
             marginBottom={3}
-            sx={{ color: "primary.main" }}
+            sx={{ color: "orange.main" }}
           >
             Modifier le produit
           </Typography>

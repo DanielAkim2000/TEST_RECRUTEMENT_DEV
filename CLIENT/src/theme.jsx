@@ -19,12 +19,14 @@ const theme = createTheme({
     },
     primary: {
       main: "#007bff",
+      dark: "#0056b3",
     },
     secondary: {
       main: "#6c757d",
     },
     orange: {
       main: "#fd7e14",
+      dark: "#ff6b00",
     },
     success: {
       main: "#28a745",

@@ -20,6 +20,7 @@ import {
   DialogActions,
   Button,
   Slide,
+  Popover,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useSelector } from "react-redux";
@@ -126,6 +127,19 @@ const TableProducts = () => {
     // permet de déselectionner les produits sélectionnés si on change de page
     setProductsSelected([]);
   }, [search, page, limit, refetch, priceMin, priceMax, category, triPrice]);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [description, setDescription] = useState(null);
+
+  const handlePopoverOpen = (event, desc) => {
+    setAnchorEl(event.currentTarget);
+    setDescription(desc);
+  };
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+    setDescription(null);
+  };
+
+  const open = Boolean(anchorEl);
 
   if (error) {
     return (
@@ -136,19 +150,28 @@ const TableProducts = () => {
       </TableContainer>
     );
   }
+
   return (
     <TableContainer
       component={Paper}
       sx={{
         boxShadow: 3,
         borderRadius: 2,
-        marginTop: {
-          xs: 3,
-          sm: 0,
-        },
+        marginTop: { xs: 3, sm: 0 },
+        padding: 2,
       }}
     >
-      <Table>
+      <Table
+        sx={{
+          borderRadius: 2,
+          overflow: "hidden",
+          "& th": {
+            backgroundColor: "orange.main",
+            color: "white",
+            fontWeight: "bold",
+          },
+        }}
+      >
         <TableHead>
           <TableRow sx={{ backgroundColor: "orange.main" }}>
             <TableCell sx={{ color: "white", fontWeight: "bold" }}>
@@ -165,8 +188,8 @@ const TableProducts = () => {
                     aria-describedby="alert-dialog-slide-description"
                   >
                     <DialogTitle>
-                      Voulez vous vraiment supprimer tous les produits
-                      sélectionnés ?
+                      Voulez-vous vraiment supprimer tous les produits
+                      sélectionnés ? ( page entière aux maximum )
                     </DialogTitle>
                     <DialogContent>
                       <DialogContentText id="alert-dialog-slide-description">
@@ -220,7 +243,7 @@ const TableProducts = () => {
               </TableCell>
             </TableRow>
           ) : filteredData?.products.length > 0 ? (
-            filteredData.products.map((product, index) => (
+            filteredData.products.map((product) => (
               <TableRow
                 key={product.id}
                 sx={{
@@ -242,7 +265,33 @@ const TableProducts = () => {
                 <TableCell>{product.id}</TableCell>
                 <TableCell>{product.name}</TableCell>
                 <TableCell>{`${product.price} €`}</TableCell>
-                <TableCell>{product.description}</TableCell>
+                <TableCell>
+                  <Typography
+                    sx={{
+                      textOverflow: "ellipsis",
+                      overflow: "hidden",
+                      whiteSpace: "nowrap",
+                      maxWidth: "150px",
+                      cursor: "pointer",
+                    }}
+                    onClick={(e) => handlePopoverOpen(e, product.description)}
+                  >
+                    {product.description.length > 20
+                      ? `${product.description.slice(0, 20)}...`
+                      : product.description}
+                  </Typography>
+                  <Popover
+                    open={open}
+                    anchorEl={anchorEl}
+                    onClose={handlePopoverClose}
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "left",
+                    }}
+                  >
+                    <Typography sx={{ padding: 2 }}>{description}</Typography>
+                  </Popover>
+                </TableCell>
                 <TableCell>{product.category.name}</TableCell>
                 <TableCell>
                   {new Date(product.createdAt).toLocaleDateString("fr-FR", {
