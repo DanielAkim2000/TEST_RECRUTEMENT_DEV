@@ -127,8 +127,7 @@ const FormProduct = ({ handleClose }) => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     if (isSubmitDisabled()) {
       return openSnackbar(
         "Veuillez vérifier les champs du formulaire",
@@ -148,7 +147,7 @@ const FormProduct = ({ handleClose }) => {
       const res = await updateProduct(trimmedProduct);
       if (res?.data) {
         openSnackbar(res.data.message, res.data.severity);
-        handleClose();
+        if (res.data.severity === "success") return handleClose();
       }
       if (res?.error?.data) {
         verifyErrors(res.error.data.violations);
@@ -158,7 +157,10 @@ const FormProduct = ({ handleClose }) => {
       }
     } else {
       const res = await createProduct(trimmedProduct);
-      if (res?.data?.message) {
+      if (res?.data) {
+        if (res.data.severity === "success") {
+          handleClose();
+        }
         openSnackbar(res.data.message, res.data.severity);
       } else {
         openSnackbar("Erreur lors de la création du produit", "error");

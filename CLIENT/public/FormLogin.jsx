@@ -6,19 +6,19 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import Spinner from "../Spinner";
+import Spinner from "../src/components/Spinner";
 import {
   useLoginMutation,
   useRegisterMutation,
   useUpdateMutation,
-} from "../../api/slices/authSlice";
+} from "../src/api/slices/authSlice";
 import { useDispatch, useSelector } from "react-redux";
-import useSnackbar from "../../hooks/useSnackBar";
+import useSnackbar from "../src/hooks/useSnackBar";
 import {
   logout,
   setAuthenticated,
   setToken,
-} from "../../redux/slices/auth.slice";
+} from "../src/redux/slices/auth.slice";
 import {
   selectEmail,
   selectFirstName,
@@ -35,9 +35,11 @@ import {
   setHelperText as setHelperTextFormLogin,
   selectNewPassword,
   setNewPassword as setNewPasswordFormLogin,
-} from "../../redux/slices/formLogin.slice";
+} from "../src/redux/slices/formLogin.slice";
 import PropTypes from "prop-types";
 import { useState } from "react";
+
+const regexMail = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
 
 const FormLogin = ({ handleCloseInfo = null }) => {
   const [register, { isLoading }] = useRegisterMutation();
@@ -338,12 +340,7 @@ const FormLogin = ({ handleCloseInfo = null }) => {
   };
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        handleSubmit();
-      }}
-    >
+    <form>
       <FormControl fullWidth>
         {(type === "register" || type === "info") && (
           <>
@@ -352,7 +349,6 @@ const FormLogin = ({ handleCloseInfo = null }) => {
               value={name}
               variant="outlined"
               type="text"
-              required
               margin="normal"
               onChange={async (e) => {
                 setName(e.target.value);
@@ -369,7 +365,6 @@ const FormLogin = ({ handleCloseInfo = null }) => {
               value={firstname}
               variant="outlined"
               type="text"
-              required
               margin="normal"
               onChange={(e) => {
                 setFirstname(e.target.value);
@@ -389,7 +384,6 @@ const FormLogin = ({ handleCloseInfo = null }) => {
           value={email}
           variant="outlined"
           type="email"
-          required
           margin="normal"
           onChange={(e) => {
             setEmail(e.target.value);
@@ -406,7 +400,6 @@ const FormLogin = ({ handleCloseInfo = null }) => {
           value={password}
           variant="outlined"
           type={typePassword}
-          required
           margin="normal"
           onChange={(e) => {
             setPassword(e.target.value);
@@ -437,7 +430,7 @@ const FormLogin = ({ handleCloseInfo = null }) => {
             helperText={
               (helperText.newPassword?.length > 0 &&
                 helperText.newPassword.join(", ")) ||
-              "Laissez vide si inchangé"
+              (type === "info" && "Laissez vide si inchangé")
             }
           />
         )}
@@ -473,7 +466,7 @@ const FormLogin = ({ handleCloseInfo = null }) => {
           variant="contained"
           color="primary"
           fullWidth
-          type="submit"
+          onClick={handleSubmit}
           disabled={disabledBtn()}
           sx={{ mt: 4 }}
         >
@@ -491,7 +484,6 @@ const FormLogin = ({ handleCloseInfo = null }) => {
               <Button
                 color="primary"
                 onClick={(e) => {
-                  e.preventDefault();
                   handleChangeType();
                 }}
               >
