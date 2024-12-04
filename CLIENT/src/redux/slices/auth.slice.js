@@ -18,9 +18,9 @@ const authSlice = createSlice({
       state.token = action.payload;
     },
     setUser: (state, action) => {
-      state.user.email = action.payload.email;
-      state.user.name = action.payload.nom;
-      state.user.firstname = action.payload.prenom;
+      state.user.email = action.payload?.email || "";
+      state.user.name = action.payload?.nom || "";
+      state.user.firstname = action.payload?.prenom || "";
     },
     setAuthenticated: (state, action) => {
       state.isAuthenticated = action.payload;

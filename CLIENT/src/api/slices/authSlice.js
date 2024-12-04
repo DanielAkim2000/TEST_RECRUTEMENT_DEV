@@ -27,6 +27,7 @@ api.injectEndpoints({
     me: build.query({
       query: () => "/auth/me",
       providesTags: ["Auth"],
+      invalidatesTags: ["Auth"],
     }),
     update: build.mutation({
       query: (body) => ({

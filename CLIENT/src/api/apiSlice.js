@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
+// si on a une erreur 401 on efface le token
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
@@ -9,6 +10,7 @@ export const api = createApi({
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
+
       return headers;
     },
   }),

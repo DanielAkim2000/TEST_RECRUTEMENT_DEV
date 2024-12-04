@@ -9,27 +9,37 @@ import {
   setPassword,
   setName,
   setNewPassword,
+  handleClose as handleCloseFormLogin,
 } from "../../redux/slices/formLogin.slice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useMeQuery } from "../../api/slices/authSlice";
-import { setUser } from "../../redux/slices/auth.slice";
+import { selectIsAuthenticated, setUser } from "../../redux/slices/auth.slice";
 
 const BtnMyProfile = ({ handleCloseModal }) => {
   const [open, setOpen] = React.useState(false);
-  const { data: user, isLoading } = useMeQuery();
+  const isAuth = useSelector(selectIsAuthenticated);
+  const {
+    data: user,
+    isLoading,
+    isSuccess,
+  } = useMeQuery({}, { refetchOnMountOrArgChange: true });
+  const resetFormLogin = () => dispatch(handleCloseFormLogin());
 
   console.log("user", user);
   const dispatch = useDispatch();
   const handleOpen = () => {
-    setOpen(true);
-    dispatch(setType("info"));
-    dispatch(setFirstName(user?.prenom));
-    dispatch(setName(user?.nom));
-    dispatch(setEmail(user?.email));
-    dispatch(setPassword(""));
-    dispatch(setNewPassword(""));
-    dispatch(setUser(user));
-    handleCloseModal();
+    if (isAuth) {
+      setOpen(true);
+      dispatch(setType("info"));
+      dispatch(setFirstName(user?.prenom));
+      dispatch(setName(user?.nom));
+      dispatch(setEmail(user?.email));
+      dispatch(setPassword(""));
+      dispatch(setUser(user));
+      dispatch(setNewPassword(""));
+
+      handleCloseModal();
+    }
   };
 
   const handleClose = () => {
@@ -40,10 +50,11 @@ const BtnMyProfile = ({ handleCloseModal }) => {
     dispatch(setPassword(""));
     dispatch(setNewPassword(""));
     handleCloseModal();
+    resetFormLogin();
     setOpen(false);
   };
 
-  if (!isLoading) {
+  if (isSuccess) {
     return (
       <>
         <MenuItem onClick={handleOpen}>Modifier mes infos</MenuItem>

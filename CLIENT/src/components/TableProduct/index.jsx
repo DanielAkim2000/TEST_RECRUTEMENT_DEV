@@ -38,6 +38,8 @@ import {
 } from "../../redux/slices/searchData.slice";
 import Spinner from "../Spinner";
 import useSnackBar from "../../hooks/useSnackBar";
+import { useMeQuery } from "../../api/slices/authSlice";
+import { selectToken } from "../../redux/slices/auth.slice";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -67,20 +69,28 @@ const TableProducts = () => {
     error,
     isFetching,
     refetch,
-  } = useSearchProductsQuery({
-    search: safeSearch,
-    page: safePage,
-    limit: safeLimit,
-    priceMin: safePrice.min,
-    priceMax: safePrice.max,
-    category: safeCategory,
-    triPrice: safeTriPrice,
-  });
+  } = useSearchProductsQuery(
+    {
+      search: safeSearch,
+      page: safePage,
+      limit: safeLimit,
+      priceMin: safePrice.min,
+      priceMax: safePrice.max,
+      category: safeCategory,
+      triPrice: safeTriPrice,
+    },
+    {
+      refetchOnMountOrArgChange: true,
+      refetchOnReconnect: true,
+    }
+  );
   const [deleteProducts, { isLoading }] = useDeleteProductsMutation();
   const { openSnackbar } = useSnackBar();
   const dispatch = useDispatch();
   const [productsSelected, setProductsSelected] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
+  const token = useSelector(selectToken);
+  const { data, refetch: refetchUseData, isSuccess } = useMeQuery();
 
   const handleChanged = (event) => {
     const { value, checked } = event.target;
@@ -120,7 +130,6 @@ const TableProducts = () => {
 
   // me permet de recharger les données à chaque fois que je change de page, de limite, de prix ou de catégorie
   useEffect(() => {
-    refetch();
     // permet de déselectionner les produits sélectionnés si on change de page
     setProductsSelected([]);
   }, [search, page, limit, refetch, priceMin, priceMax, category, triPrice]);

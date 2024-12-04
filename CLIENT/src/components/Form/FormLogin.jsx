@@ -1,4 +1,11 @@
-import { Button, FormControl, TextField, Typography } from "@mui/material";
+import {
+  Button,
+  Checkbox,
+  FormControl,
+  FormLabel,
+  TextField,
+  Typography,
+} from "@mui/material";
 import Spinner from "../Spinner";
 import {
   useLoginMutation,
@@ -7,7 +14,11 @@ import {
 } from "../../api/slices/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import useSnackbar from "../../hooks/useSnackbar";
-import { setAuthenticated, setToken } from "../../redux/slices/auth.slice";
+import {
+  logout,
+  setAuthenticated,
+  setToken,
+} from "../../redux/slices/auth.slice";
 import {
   selectEmail,
   selectFirstName,
@@ -26,6 +37,7 @@ import {
   setNewPassword as setNewPasswordFormLogin,
 } from "../../redux/slices/formLogin.slice";
 import PropTypes from "prop-types";
+import { useState } from "react";
 
 const FormLogin = ({ handleCloseInfo = null }) => {
   const [register, { isLoading }] = useRegisterMutation();
@@ -46,6 +58,7 @@ const FormLogin = ({ handleCloseInfo = null }) => {
   const setPassword = (value) => dispatch(setPasswordFormLogin(value));
   const setNewPassword = (value) => dispatch(setNewPasswordFormLogin(value));
   const handleClose = () => dispatch(handleCloseFormLogin());
+  const [typePassword, setTypePassword] = useState("password");
 
   const { openSnackbar } = useSnackbar();
 
@@ -295,6 +308,12 @@ const FormLogin = ({ handleCloseInfo = null }) => {
           openSnackbar(res.data.message, res.data.serverity);
           // fermer le modal info
           handleCloseInfo();
+          handleClose();
+          dispatch(logout());
+          openSnackbar(
+            "Suit à la mise à jour de vos informations, vous avez été déconnecté",
+            "info"
+          );
         }
       }
     } catch (error) {
@@ -386,7 +405,7 @@ const FormLogin = ({ handleCloseInfo = null }) => {
           label="Mot de passe"
           value={password}
           variant="outlined"
-          type="password"
+          type={typePassword}
           required
           margin="normal"
           onChange={(e) => {
@@ -407,7 +426,7 @@ const FormLogin = ({ handleCloseInfo = null }) => {
             label="Nouveau mot de passe"
             value={newPassword}
             variant="outlined"
-            type="password"
+            type={typePassword}
             margin="normal"
             onChange={(e) => {
               setNewPassword(e.target.value);
@@ -422,6 +441,34 @@ const FormLogin = ({ handleCloseInfo = null }) => {
             }
           />
         )}
+        <div className="mt-2 flex flex-row items-center justify-start">
+          <Checkbox
+            onClick={() => {
+              setTypePassword(
+                typePassword === "password" ? "text" : "password"
+              );
+            }}
+            sx={{
+              color: "orange.main",
+              "&.Mui-checked": {
+                color: "orange.main",
+              },
+            }}
+          />
+          <FormLabel
+            //grey #
+            color="#9E9E9E"
+            sx={{
+              ml: 1,
+              color: "#9E9E9E",
+              "&:hover": {
+                color: "#9E9E9E",
+              },
+            }}
+          >
+            Afficher le mot de passe
+          </FormLabel>
+        </div>
         <Button
           variant="contained"
           color="primary"

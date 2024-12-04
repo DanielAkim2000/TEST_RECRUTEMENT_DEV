@@ -108,7 +108,7 @@ class AuthController extends AbstractController
             }
 
             $usercheck = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
-            if ($usercheck) {
+            if ($usercheck  && $user->getEmail() !== $email) {
                 $violations = [
                     "violations" => [
                         [
