@@ -146,13 +146,13 @@ Le frontend sera accessible à l’adresse http://localhost:5173.
 - **Authentification sécurisée via JWT** : Les actions sensibles (ajout, modification, suppression de produits) sont protégées par un token JWT.
 - **Gestion des utilisateurs** : Inscription, connexion, et modification des informations de l’utilisateur via JWT.
 
-Frontend
+### Frontend
 
-- \*\*Affichage de la liste des catégories avec scroll infini : Affichage des catégories avec une gestion du scroll infini, réduisant la charge de données en mémoire.
-- \*\*Pagination : Utilisation d’une pagination dynamique pour afficher les produits par lots.
-- \*\*Filtrage et tri : Les utilisateurs peuvent filtrer et trier les produits selon des critères spécifiques, avec la possibilité de définir la taille de la page.
-- \*\*Responsivité : L’interface est construite en utilisant une approche mobile-first avec Tailwind CSS pour garantir une bonne expérience utilisateur sur tous les appareils.
-- \*\*Connexion et gestion des utilisateurs : L’interface permet à un utilisateur de se connecter, de s’inscrire et de gérer ses informations personnelles.
+- **Affichage de la liste des catégories avec scroll infini** : Affichage des catégories avec une gestion du scroll infini réduisant la charge de données en mémoire.
+- **Pagination** : Utilisation d’une pagination dynamique pour afficher les produits par lots.
+- **Filtrage et tri** : Les utilisateurs peuvent filtrer et trier les produits selon des critères spécifiques, avec la possibilité de définir la taille de la page.
+- **Responsivité** : L’interface est construite en utilisant une approche mobile-first avec Tailwind CSS pour garantir une bonne expérience utilisateur sur tous les appareils.
+- **Connexion et gestion des utilisateurs** : L’interface permet à un utilisateur de se connecter, de s’inscrire et de gérer ses informations personnelles.
 
 ## Choix techniques
 
