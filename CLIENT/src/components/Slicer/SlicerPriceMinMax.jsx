@@ -14,7 +14,7 @@ function valuetext(value) {
   return `${value} €`;
 }
 
-const minDistance = 100000;
+const minDistance = 50;
 
 const StyledSlider = styled(Slider)({
   color: "#007bff",
@@ -134,7 +134,7 @@ const InputPriceFilter = () => {
             }`,
           },
         ]}
-        step={Math.max(1, maxPriceLabel / 100)}
+        step={parseInt(maxPriceLabel / 100)}
         disableSwap
       />
     </div>

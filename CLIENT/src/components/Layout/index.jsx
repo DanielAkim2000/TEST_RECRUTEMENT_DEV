@@ -7,7 +7,7 @@ const Layout = () => {
   return (
     <div>
       <Header />
-      <Container maxWidth="xl" className="mt-10">
+      <Container maxWidth="xl" className="mt-10 pb-10">
         <Outlet />
       </Container>
     </div>

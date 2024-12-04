@@ -14,7 +14,7 @@ import {
 } from "../../api/slices/product.slice";
 import PropTypes from "prop-types";
 import Spinner from "../Spinner";
-import useSnackbar from "../../hooks/useSnackbar";
+import useSnackbar from "../../hooks/useSnackBar";
 
 const regexTEXT = /^[a-zA-Z0-9\s]*$/;
 const regexNUMBER = /^[0-9]*$/;
@@ -100,15 +100,14 @@ const FormProduct = ({ handleClose }) => {
 
   const verifyErrors = (violations) => {
     const violationsGrouped = violations.reduce((acc, violation) => {
-      const { propertyPath, title } = violation; // Propriétés spécifiques des violations
+      const { propertyPath, title } = violation;
       if (!acc[propertyPath]) {
         acc[propertyPath] = [];
       }
-      acc[propertyPath].push(title); // Ajoute le message d'erreur au bon champ
+      acc[propertyPath].push(title);
       return acc;
     }, {});
 
-    // Met à jour uniquement les champs concernés
     setHelperText((prev) => ({
       ...prev,
       ...violationsGrouped,

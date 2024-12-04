@@ -19,10 +19,15 @@ const scrollInfiniteSlice = createSlice({
     setData: (state, action) => {
       state.data = [...state.data, ...action.payload];
     },
+    resetData: (state) => {
+      state.data = [];
+      state.offset = 0;
+    },
   },
 });
 
-export const { setOffset, setLimit, setData } = scrollInfiniteSlice.actions;
+export const { setOffset, setLimit, setData, resetData } =
+  scrollInfiniteSlice.actions;
 
 export const selectOffset = (state) => state.scrollInfinite.offset;
 export const selectLimit = (state) => state.scrollInfinite.limit;

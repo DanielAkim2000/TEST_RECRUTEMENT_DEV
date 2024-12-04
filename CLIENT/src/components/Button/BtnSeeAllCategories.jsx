@@ -35,6 +35,7 @@ import PropTypes from "prop-types";
 import useSnackBar from "../../hooks/useSnackBar";
 import Spinner from "../Spinner";
 import {
+  resetData,
   selectData,
   selectLimit,
   selectOffset,
@@ -270,7 +271,6 @@ const BtnSeeAllCategories = () => {
       setHasMore(false); // désactiver le chargement s'il n'y a pas de nouvelles données
     } else {
       dispatch(setData(data)); // mettre à jour les catégories
-      // setOffset((prev) => prev + limit); // mettre à jour l'offset
       dispatch(setOffset(offset + limit)); // mettre à jour l'offset
     }
     setLoading(false); // désactiver le chargement
@@ -312,6 +312,9 @@ const BtnSeeAllCategories = () => {
   // fermeture de la modal
   const handleClose = () => {
     setOpen(false);
+    dispatch(resetData());
+    setHasMore(true); // réinitialiser hasMore
+    setPrevOffset(null); // réinitialiser prevOffset
     if (debounceTimer) {
       clearTimeout(debounceTimer); // arrêter le debounce si la modal est fermée
     }
@@ -344,7 +347,7 @@ const BtnSeeAllCategories = () => {
             boxShadow: 24,
             borderRadius: 5,
             p: 4,
-            maxHeight: "80vh", // pour limiter la hauteur
+            maxHeight: "70vh", // pour limiter la hauteur
             overflowY: "scroll",
           }}
         >

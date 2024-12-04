@@ -3,7 +3,7 @@ import React from "react";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, selectIsAuthenticated } from "../../redux/slices/auth.slice";
-import useSnackbar from "../../hooks/useSnackbar";
+import useSnackbar from "../../hooks/useSnackBar";
 import BtnMyProfile from "./BtnMyProfile";
 
 const BtnLogout = () => {

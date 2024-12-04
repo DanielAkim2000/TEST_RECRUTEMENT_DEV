@@ -13,7 +13,7 @@ import {
   useUpdateMutation,
 } from "../../api/slices/authSlice";
 import { useDispatch, useSelector } from "react-redux";
-import useSnackbar from "../../hooks/useSnackbar";
+import useSnackbar from "../../hooks/useSnackBar";
 import {
   logout,
   setAuthenticated,
@@ -133,7 +133,7 @@ const FormLogin = ({ handleCloseInfo = null }) => {
 
     switch (field) {
       case "name":
-        if (!/^[a-zA-Z]+$/.test(value)) {
+        if (!/^[a-zA-Z]+(\s+[a-zA-Z]+)*$/.test(value)) {
           errors.push("Votre nom doit contenir que des lettres.");
         }
         if (value.length <= 2) {
@@ -141,7 +141,7 @@ const FormLogin = ({ handleCloseInfo = null }) => {
         }
         break;
       case "firstname":
-        if (!/^[a-zA-Z]+$/.test(value)) {
+        if (!/^[a-zA-Z]+(\s+[a-zA-Z]+)*$/.test(value)) {
           errors.push("Votre prénom doit contenir que des lettres.");
         }
         if (value.length <= 2) {

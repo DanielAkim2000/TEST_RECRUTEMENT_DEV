@@ -24,7 +24,7 @@ class Product
     #[Assert\NotBlank(message: 'Le nom ne doit pas être vide')]
     #[Assert\Length(min: 3, max: 255, minMessage: 'Le nom doit contenir au moins 3 caractères', maxMessage: 'Le nom doit contenir au maximum 255 caractères')]
     #[Assert\Type(type: 'string', message: 'Le nom doit être une chaîne de caractères')]
-    #[Assert\Regex(pattern: '/^[a-zA-Z0-9_]+$/', message: 'Le nom ne doit contenir que des lettres, des chiffres et des tirets')]
+    #[Assert\Regex(pattern: '/^[a-zA-Z0-9_ ]+$/', message: 'Le nom ne doit contenir que des lettres, des chiffres et des tirets')]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT)]
@@ -32,7 +32,7 @@ class Product
     #[Assert\NotBlank(message: 'La description ne doit pas être vide')]
     #[Assert\Length(min: 3, max: 1024, minMessage: 'La description doit contenir au moins 3 caractères', maxMessage: 'La description doit contenir au maximum 1024 caractères')]
     #[Assert\Type(type: 'string', message: 'La description doit être une chaîne de caractères')]
-    #[Assert\Regex(pattern: '/^[a-zA-Z0-9_]+$/', message: 'La description ne doit contenir que des lettres, des chiffres et des tirets')]
+    #[Assert\Regex(pattern: '/^[a-zA-Z0-9_ ]+$/', message: 'La description ne doit contenir que des lettres, des chiffres et des tirets')]
     private ?string $description = null;
 
     #[ORM\Column]

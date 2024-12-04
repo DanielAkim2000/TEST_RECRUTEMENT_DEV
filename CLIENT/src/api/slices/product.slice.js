@@ -2,13 +2,6 @@ import { api } from "../apiSlice";
 
 const productSlice = api.injectEndpoints({
   endpoints: (builder) => ({
-    getProducts: builder.query({
-      query: () => "/api/products",
-      providesTags: ["Products"],
-    }),
-    getProduct: builder.query({
-      query: (id) => `/api/product/${id}`,
-    }),
     getPrixMax: builder.query({
       query: () => "/api/products/prixMax",
       providesTags: ["PrixMax"],
@@ -61,8 +54,6 @@ const productSlice = api.injectEndpoints({
 });
 
 export const {
-  useGetProductsQuery,
-  useGetProductQuery,
   useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,

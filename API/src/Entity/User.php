@@ -27,14 +27,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank(message: 'Veuillez saisir votre nom')]
     #[Assert\Length(min: 3, max: 50, minMessage: 'Votre nom doit contenir au moins 3 caractères', maxMessage: 'Votre nom doit contenir au maximum 50 caractères')]
-    #[Assert\Regex(pattern: '/^[a-zA-Z0-9_]+$/', message: 'Votre nom ne doit contenir que des lettres, des chiffres et des tirets')]
+    #[Assert\Regex(pattern: '/^[a-zA-Z]+(\s+[a-zA-Z]+)*$/', message: 'Votre nom ne doit contenir que des lettres, des chiffres et des tirets')]
     #[Groups(['user:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank(message: 'Veuillez saisir votre prénom')]
     #[Assert\Length(min: 3, max: 50, minMessage: 'Votre prénom doit contenir au moins 3 caractères', maxMessage: 'Votre prénom doit contenir au maximum 50 caractères')]
-    #[Assert\Regex(pattern: '/^[a-zA-Z0-9_]+$/', message: 'Votre prénom ne doit contenir que des lettres, des chiffres et des tirets')]
+    #[Assert\Regex(pattern: '/^[a-zA-Z]+(\s+[a-zA-Z]+)*$/', message: 'Votre prénom ne doit contenir que des lettres, des chiffres et des tirets')]
     #[Groups(['user:read'])]
     private ?string $prenom = null;
 
