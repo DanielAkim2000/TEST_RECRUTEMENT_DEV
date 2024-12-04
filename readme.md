@@ -1,4 +1,4 @@
-###### Teach’r Test Technique - Développeur Full-Stack
+# Teach’r Test Technique - Développeur Full-Stack
 
 Description
 
