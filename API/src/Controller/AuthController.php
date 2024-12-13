@@ -18,14 +18,12 @@ class AuthController extends AbstractController
     private EntityManagerInterface $entityManager;
     private ValidatorInterface $validator;
     private $jwtManager;
-    private $security;
 
-    public function __construct(EntityManagerInterface $entityManager, ValidatorInterface $validator, JWTTokenManagerInterface $jwtManager, Security $security)
+    public function __construct(EntityManagerInterface $entityManager, ValidatorInterface $validator, JWTTokenManagerInterface $jwtManager)
     {
         $this->entityManager = $entityManager;
         $this->validator = $validator;
         $this->jwtManager = $jwtManager;
-        $this->security = $security;
     }
 
     #[Route('/auth/register', name: 'register', methods: ['POST'])]
